@@ -1,0 +1,49 @@
+= JBug Newcastle: Ruby on Rails on TorqueBox
+
+== Installation
+
+=== Prequisits
+
+  yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel java
+
+=== RVM
+
+  curl -L https://get.rvm.io | bash -s stable
+  source /etc/profile.d/rvm.sh
+
+Check out your personal message from Wayne.  So compassionate!
+
+=== JRuby
+
+  rvm install jruby
+
+=== TorqueBox
+
+  rvm gemset create torquebox
+  rvm use jruby-1.6.7.2@torquebox
+
+  jruby -J-Xmx1024m -S gem install torquebox-server
+
+== Running TorqueBox
+
+TorqueBox creates a command line tool for managing your torquebox server.  You can checkout the avaiable commands through:
+
+  torquebox
+
+You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are using.
+
+  torquebox env
+
+=== Starting TorqueBox
+
+  torquebox run
+
+=== Deploying Rails onto TorqueBox
+
+== Install Rails
+
+  gem install rails
+
+
+
+
