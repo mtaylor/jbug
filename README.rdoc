@@ -8,8 +8,9 @@
 
 === RVM
 
+  # Run as user not root
   curl -L https://get.rvm.io | bash -s stable
-  source /etc/profile.d/rvm.sh
+  source ~/.bash_profile
 
 Check out your personal message from Wayne.  So compassionate!
 
@@ -19,6 +20,7 @@ Check out your personal message from Wayne.  So compassionate!
 
 === TorqueBox
 
+  rvm use jruby
   rvm gemset create torquebox
   rvm use jruby-1.6.7.2@torquebox
 
@@ -38,12 +40,9 @@ You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are using
 
   torquebox run
 
-=== Deploying Rails onto TorqueBox
-
-== Install Rails
+=== Install rails
 
   gem install rails
-
 
 
 
