@@ -78,9 +78,10 @@ Then run bundler to pull in the dependecies into our gemset.
 
   bundle update
 
-Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we have to install it.
+Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to run some tasks specific to devise.
 
   rails devise:install
+  rails generate devise:views
 
 == Models and Migrations
 
@@ -209,6 +210,168 @@ There you have it.  You've successfully managed to create new models, migrations
   rails s
 
 == Controllers and Views
+
+Now that we have the models complete.  We can start building our web application.  The first thing we're going to do is add in a controller and some views for managing our User.  Rails has a scaffolding mcahnism that generates a controller and views for standard CRUD operations.  As we'll see in a moment, these operations are associated with HTTP verbs and respond to endpoints conventional to REST.
+
+we'll need to temporarily disable the devise namespace as it will conflict with out scaffold.  Open up config/routes.rb and comment out this line.
+
+  # devise_for :users
+
+Now, lets run the scaffold.  Since we've already created our migration we tell rails to skip it, we also tell rails to skip any files that conflict with the generated files, such as our user model.
+
+  rails generate scaffold User --skip-migration --skip
+
+You'll notce that rails create a bunch of files.  Ignore these, for now We're only intersted in the controller, views, and routes.rb.
+
+Next thing we'll do is add our root route.  This the route that is initiated when a user first navigates to your application.  We'll set this as the index action of our users controller.  In routes.rb add:
+
+  root :to => 'users#index'
+
+whilst we're here we can uncomment the devise_for :users
+
+  devise_for :users
+
+Now, we just need to remove the default index.html file
+
+  rm -f public/index.html
+
+We'll add in some mock data so we can see the site in action.
+
+  rake db:seed
+
+Lets start up the server and see it in action.
+
+  torquebox deploy
+  torquebox run
+
+Once torquebox has started navigate to http://localhost:8080
+
+It's not particularly exciting right now.  But we'll jazz it up later.
+
+The first thing we want to do is to add some links for logging in and out.  Since we want these on each page we visit, we'll add them to the application layout.  Open up app/views/applicaton.html.erb and add in the following content in the body tag before yield.
+
+  <header>
+    <% if user_signed_in? %>
+       <%= "Hello  #{current_user.name}" %> |
+       <%= link_to('Logout', destroy_user_session_path, :method => :delete) %>
+    <% else %>
+        <%= link_to('Login', new_user_session_path)  %> |
+        <%= link_to('Register', new_user_registration_path) %>
+    <% end %>
+  </header>
+
+Devise gives us helper methods to get the current_user and to check if a user is logged in.
+
+Next we'll update the devise new registration view so that we can retrieve the name and dob.  Open up app/views/devise/registrations/new.html.erb and add in our extra content under the email section.  Notice we use the form helper methods here:
+
+  <div><%= f.label :name %><br />
+  <%= f.text_field :name %></div>
+
+  <div><%= f.label :dob %><br />
+  <%= f.date_select :dob, :start_year => 1900 %></div>
+
+Great.  Now we can login, register and view users.  Next we want to allow users to add friends.  To handle friendships we'll create a new controller:
+
+  rails generate controller friendships create destroy
+
+Since we didn't we'll have to implement the actions ourselves.  Open up app/controllers/friendships_controller.rb and add in our business logic.
+
+class FriendshipsController < ApplicationController
+  def create
+    friend = User.find(params[:id])
+
+    current_user.friends << friend
+
+    if current_user.save
+      flash[:notice] = "Friend Added"
+    else
+      flash[:error] = "Unable to add friend"
+    end
+    redirect_to root_path
+  end
+
+  def destroy
+    current_user.friends.delete(current_user.friends.find(params[:id]))
+
+    if current_user.save
+      flash[:notice] = "Friend Removed"
+    else
+      flash[:error] = "Unable to remove friend"
+    end
+    redirect_to root_path
+  end
+
+end
+
+
+Next let's update the users list page and add a link for adding friends.
+
+Remove the edit and destroy links and add in the links to create and remove friends.  We'll also remove the new user link whilst we're here.  (We use devise for handling registrations so we don't need to create users ourselves).
+
+<h1>Listing users</h1>
+
+<table>
+  <tr>
+    <th>Email</th>
+    <th>Name</th>
+    <th>Dob</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @users.each do |user| %>
+  <tr>
+    <td><%= user.email %></td>
+    <td><%= user.name %></td>
+    <td><%= user.dob %></td>
+    <td><%= link_to 'Show', user %></td>
+    <% if current_user %>
+      <% if current_user.friends.include?(user) %>
+        <td><%= link_to 'Remove Friends', friendship_path(:id => user), :method => :delete %></td>
+      <% else %>
+        <td><%= link_to 'Add Friend', friendships_path(:id => user), :method => :post %></td>
+      <% end %>
+    <% end %>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+Lastly We add a section on our show user page to list their friends.
+
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Email:</b>
+  <%= @user.email %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%= @user.name %>
+</p>
+
+<p>
+  <b>Dob:</b>
+  <%= @user.dob %>
+</p>
+
+<h3> Friends </h3>
+
+<ul>
+  <% @user.friends.each do |user| %>
+    <li> <%= link_to user.email, user_path(user) %> </li>
+  <% end %>
+</ul>
+
+<%= link_to 'Back', users_path %>
+
+
+
+
+
 
 
 
