@@ -1,6 +1,6 @@
 = JBug Newcastle: Ruby on Rails on TorqueBox
 
-== Installation
+== 1. Installation
 
 === Prerequisites
 
@@ -44,5 +44,70 @@ You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are using
 
   gem install rails
 
+== 2. Face Blog
+
+Now that you have everything installed, you're ready to rock n roll.  It's time to create your first rails application.  You're going to create a new social networking site called Face Blog.
+
+== Creating a Rails App
+
+First thing you need to do is create a rails application.
+
+  rails new face_blog
+
+Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects.  The main areas you'll be working in today are:
+
+app/* => Contains all your MVC files
+config/ => Used to configure your app
+db => where migrations and schema lives
+
+== Adding gems
+
+First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
+
+We're going to add "devise" (an authentication mechanism for rails) to our gem file
+
+In the Gemfile, under
+
+  gem "rails", "3.2.3"
+
+Add
+
+  gem devise
+
+Then run bundler to pull in the dependecies into our gemset.
+
+  bundle update
+
+Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we have to install it.
+
+  rails devise:install
+
+== Models and Migrations
+
+To create our user model we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+
+  rails generate
+
+For our user model we'll use the devise generator.
+
+  rails generate devise User name:string dob:date
+
+If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all forms of authentication.
+
+Now that we've added some migrations we must migrate the database.
+
+  rake db:migrate
+
+You can test out your model by looking in the rails console.
+
+  rails c
+  1.9.2p318 :002 > User.new
+
+
+
+
+Face Blog's Model relationships looks like this:
+
+link:images/model_erd.png
 
 
