@@ -69,7 +69,7 @@
   
 <h1 id="label-JBug+Newcastle%3A+Ruby+on+Rails+on+TorqueBox">JBug Newcastle: Ruby on Rails on TorqueBox</h1>
 
-<h2 id="label-Installation">Installation</h2>
+<h2 id="label-1.+Installation">1. Installation</h2>
 
 <h3 id="label-Prerequisites">Prerequisites</h3>
 
@@ -114,6 +114,83 @@ using.</p>
 <h3 id="label-Install+rails">Install rails</h3>
 
 <pre>gem install rails</pre>
+
+<h2 id="label-2.+Face+Blog">2. Face Blog</h2>
+
+<p>Now that you have everything installed, you’re ready to rock n roll.  It’s
+time to create your first rails application.  You’re going to create a new
+social networking site called Face Blog.</p>
+
+<h2 id="label-Creating+a+Rails+App">Creating a Rails App</h2>
+
+<p>First thing you need to do is create a rails application.</p>
+
+<pre>rails new face_blog</pre>
+
+<p>Notice the file structure.  Every rails app looks the same.  This makes it
+easy to quickly get involved in other rails projects.  The main areas
+you’ll be working in today are:</p>
+
+<p>app/* =&gt; Contains all your MVC files config/ =&gt; Used to configure
+your app db =&gt; where migrations and schema lives</p>
+
+<h2 id="label-Adding+gems">Adding gems</h2>
+
+<p>First thing we’re going to add to our site is a User.  We want to allow the
+user to login, signup and all that jazz.  But of course we’re not going to
+write all that ourselves.  We’ll use a library to do the grunt work for us.</p>
+
+<p>We’re going to add “devise” (an authentication mechanism for rails) to our
+gem file</p>
+
+<p>In the Gemfile, under</p>
+
+<pre>gem &quot;rails&quot;, &quot;3.2.3&quot;</pre>
+
+<p>Add</p>
+
+<pre>gem devise</pre>
+
+<p>Then run bundler to pull in the dependecies into our gemset.</p>
+
+<pre>bundle update</pre>
+
+<p>Devise is a rails engine (<a
+href="http://guides.rubyonrails.org/engines.html">guides.rubyonrails.org/engines.html</a>),
+don’t worry about what engines are right now, we just need to know that we
+have to install it.</p>
+
+<pre>rails devise:install</pre>
+
+<h2 id="label-Models+and+Migrations">Models and Migrations</h2>
+
+<p>To create our user model we’ll use a model generator.  We don’t always have
+to stick to the generators that come with rails.  3rd party libraries can
+also offer generators.  To see which generators you have avaiable to you. 
+You can run</p>
+
+<pre>rails generate</pre>
+
+<p>For our user model we’ll use the devise generator.</p>
+
+<pre>rails generate devise User name:string dob:date</pre>
+
+<p>If you look at the migration that devise created (under db/migrate) you can
+see the extra information devise has added to support all forms of
+authentication.</p>
+
+<p>Now that we’ve added some migrations we must migrate the database.</p>
+
+<pre>rake db:migrate</pre>
+
+<p>You can test out your model by looking in the rails console.</p>
+
+<pre>rails c
+1.9.2p318 :002 &gt; User.new</pre>
+
+<p>Face Blog’s Model relationships looks like this:</p>
+
+<p><img src="images/model_erd.png" /></p>
 
 </div>
 
