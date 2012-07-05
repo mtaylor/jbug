@@ -1,0 +1,26 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <b>Email:</b>
+  <%= @user.email %>
+</p>
+
+<p>
+  <b>Name:</b>
+  <%= @user.name %>
+</p>
+
+<p>
+  <b>Dob:</b>
+  <%= @user.dob %>
+</p>
+
+<h3> Friends </h3>
+
+<ul>
+  <% @user.friends.each do |user| %>
+    <li> <%= link_to user.email, user_path(user) %> </li>
+  <% end %>
+</ul>
+
+<%= link_to 'Back', users_path %>
