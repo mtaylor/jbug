@@ -274,99 +274,97 @@ Great.  Now we can login, register and view users.  Next we want to allow users 
 
   rails generate controller friendships create destroy
 
-Since we didn't we'll have to implement the actions ourselves.  Open up app/controllers/friendships_controller.rb and add in our business logic.
+Since we didn't, we'll have to implement the actions ourselves.  Open up app/controllers/friendships_controller.rb and add in our business logic.
+
+create and destory are our actions.  In each action we use the params to retrieve the id of the resource we're working on.  In both cases we're using the params to retreive the ID of the friend, then we're simply adding or removing it from our current users friends.
 
 class FriendshipsController < ApplicationController
   def create
     friend = User.find(params[:id])
 
     current_user.friends << friend
-
-    if current_user.save
-      flash[:notice] = "Friend Added"
-    else
-      flash[:error] = "Unable to add friend"
-    end
+    current_user.save
     redirect_to root_path
   end
 
   def destroy
     current_user.friends.delete(current_user.friends.find(params[:id]))
-
-    if current_user.save
-      flash[:notice] = "Friend Removed"
-    else
-      flash[:error] = "Unable to remove friend"
-    end
     redirect_to root_path
   end
 
 end
 
 
-Next let's update the users list page and add a link for adding friends.
+Next let's update the users list page and add in links for adding and removing friends.
 
-Remove the edit and destroy links and add in the links to create and remove friends.  We'll also remove the new user link whilst we're here.  (We use devise for handling registrations so we don't need to create users ourselves).
-
-<h1>Listing users</h1>
+We're going to customise this page a little whilst we're here.  We'll remove the new, edit and destroy links and add in some links to handle adding and removing friends.  Notice we use the devise helper methods 'current_user' inline with our html to determine when to show the friendship links.  We also use our friendship relation to check which users the current_user is friends with.  
 
 <table>
-  <tr>
-    <th>Email</th>
-    <th>Name</th>
-    <th>Dob</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
+  <% @users.each do |user| %>
+    <tr>
+      <!-- Here we're adding a few place holders so we can tart it up later -->
+      <td class='avatar'>
+      </td>
+      <td class='info'>
+        <%= link_to user.name, user %>
+      </td>
 
-<% @users.each do |user| %>
-  <tr>
-    <td><%= user.email %></td>
-    <td><%= user.name %></td>
-    <td><%= user.dob %></td>
-    <td><%= link_to 'Show', user %></td>
-    <% if current_user %>
-      <% if current_user.friends.include?(user) %>
-        <td><%= link_to 'Remove Friends', friendship_path(:id => user), :method => :delete %></td>
-      <% else %>
-        <td><%= link_to 'Add Friend', friendships_path(:id => user), :method => :post %></td>
-      <% end %>
-    <% end %>
-  </tr>
-<% end %>
+      <td class='links'>
+        <!-- check to see if a current_user exists i.e. is a user logged in -->
+        <% if current_user %>
+          <!-- If the current user is friends with the user we are working with, then display 'remove friend' else 'add friend' -->
+          <% if current_user.friends.include?(user) %>
+            <%= link_to 'Remove Friend', friendship_path(:id => user), :method => :delete %>
+          <% else %>
+            <%= link_to 'Add Friend', friendships_path(:id => user), :method => :post %>
+          <% end %>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
 </table>
 
-<br />
 
-Lastly We add a section on our show user page to list their friends.
+Lastly We add a section on our show user page to list their friends and do a little tidying up.
 
-<p id="notice"><%= notice %></p>
+<div id="info">
+  <div id="avatar"></div>
+  <div id="user_info">
+    <%= @user.name %></br>
+    <%= @user.dob %></br>
+  </div>
+  <div id="contact">
+    <%= @user.email %>
+  </div>
 
-<p>
-  <b>Email:</b>
-  <%= @user.email %>
-</p>
+  <!-- iterate over @users friends (we set @user in the controller) -->
+  <div id="friends">
+    <h3>Friends</h3>
+    <% @user.friends.each do |user| %>
+      <div id="friend"><%= link_to user.name, user_path(user) %></div>
+    <% end %>
+  </div>
+</div>
 
-<p>
-  <b>Name:</b>
-  <%= @user.name %>
-</p>
+Now login/register and make some friends, then navigate to your user page.  You should be able to see a list of your friends.  Fantastic.
 
-<p>
-  <b>Dob:</b>
-  <%= @user.dob %>
-</p>
+Now our website functions as we want it, we can add a bit of style.  
 
-<h3> Friends </h3>
+copy the 'application.css' and images found in the src/assets/stylesheets src/assets/images directory into your applications app/assets/stylesheets and app/assets/images directories.  Refresh your browser and take a moment to awe at your magnificant creation.
 
-<ul>
-  <% @user.friends.each do |user| %>
-    <li> <%= link_to user.email, user_path(user) %> </li>
-  <% end %>
-</ul>
+=== Overview
 
-<%= link_to 'Back', users_path %>
+In this section we looked at controllers and views.  We seen how they are linked together through render and through exposing global variables.  We took a brief look at some of rails form helper methods and at the link_to helper.  We've only scratched the surface of what is possible with rails at this point.  You can find detailed information on rails helpers, controllers, routes and whole lot more here: 
+
+http://guides.rubyonrails.org/
+
+== TorqueBox Messaging
+
+EVerything we've used so far has been strictly rails only.  Now its time to take a look at some of the cool features we get from TorqueBox.  We're going to add the ability for users to subscribe to their friends and to create posts.  We'll use TorqueBox messaging to do all this for us.  TorqueBox messaging is simply a ruby wrapper around JBoss's super fast, high performance Messaging solution, HornetQ.  To find out more about HornetQ visit: https://www.jboss.org/hornetq  For more information about TorqueBox and TorquBox messaging you can checkout their website and documentation here: http://torquebox.org/
+
+=== Adding Messaging to Face Blog.
+
+
 
 
 
