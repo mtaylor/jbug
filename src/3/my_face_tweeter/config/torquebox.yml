@@ -1,5 +1,0 @@
-queues:
-  /queues/tweet:
-
-messaging:
-  /queues/tweet:     TweetProcessor
