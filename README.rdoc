@@ -366,6 +366,65 @@ EVerything we've used so far has been strictly rails only.  Now its time to take
 
 
 
+rails generate scaffold Message user_id:integer subject:string body:text create
+
+add
+
+belongs_to :user to message
+has_many :messages to user
+
+ ## note you have to move the css into the 2
+<div id="info">
+  <div id="avatar"></div>
+  <div id="user_info">
+    <%= @user.name %></br>
+    <%= @user.dob %></br>
+  </div>
+  <div id="contact">
+    <%= @user.email %>
+  </div>
+
+  <!-- iterate over @users friends (we set @user in the controller) -->
+  <div id="friends">
+    <h3>Friends</h3>
+    <% @user.friends.each do |user| %>
+      <div id="friend"><%= link_to user.name, user_path(user) %></div>
+    <% end %>
+  </div>
+</div>
+<div id="messages">
+  <!-- Form for creating messages -->
+  <div id="create_message">
+  	<% if current_user%>
+      <%= form_for Message.new do |f| %>
+        <%= f.text_field :body, :class => "message" %>
+        <%= f.submit "Send", :class => "message_send" %>
+      <% end %>
+   <% end %>
+  </div>
+
+  <!-- Display this users messages -->
+  <div id="show_messages">
+  	<table>
+      <% @user.messages.reverse.each do | message | %>
+      <tr class='message'>
+        <td class="message_avatar"></td>
+        <td class="message_details"><%= message.user.name %></td>
+        <td class="message_body"><%= message.body %></td>
+      </tr>
+      <% end %>
+    </table>
+  </div>
+</div>
+
+
+add torqueboxmessaging gem
+
+
+
+
+
+
 
 
 

@@ -1,2 +1,5 @@
 queues:
-  '/queues/tweet'
+  /queues/tweet:
+
+messaging:
+  /queues/tweet:     TweetProcessor

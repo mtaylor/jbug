@@ -15,7 +15,6 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     @message = Message.new
-    @user.read_topics
 
     respond_to do |format|
       format.html # show.html.erb
