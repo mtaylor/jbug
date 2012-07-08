@@ -10,7 +10,7 @@ You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are using
 
 === Deploying You App and Starting TorqueBox
 
-  make sure that JBOSS_HOME and $TORQUEBOX_HOME point to the torquebox gem.
+Make sure that JBOSS_HOME and $TORQUEBOX_HOME point to the torquebox gem.
 
   export TORQUEBOX_HOME= ~/.rvm/gems/jruby-1.6.7@jbug/gems/torquebox-server-2.0.3-java/
   export JBOSS_HOME=$TORQUEBOX_HOME/jboss

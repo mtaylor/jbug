@@ -16,7 +16,7 @@ and cd into src/app/3/face_blog we'll continue from here.
 
 The application is updated a little.  We've added the in an extra model to handle the user -> message association:
 
-link:images/first_model_erd.png
+link:images/model_erd.png
 
 and we've also added an extra controller and content to our views for creating and viewing our messages.  Deploy the application and check out the changes.
 
