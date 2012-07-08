@@ -10,36 +10,38 @@ First thing you need to do is create a rails application.
 
 Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects.  The main areas you'll be working in today are:
 
-app/* => Contains all your MVC files
-config/ => Used to configure your app
-db => where migrations and schema lives
+  app/* => Contains all your MVC files
+  config/ => Used to configure your app
+  db => where migrations and schema lives
 
 == Adding gems
 
 First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
 
-We're going to add "devise" (an authentication mechanism for rails) to our gem file
+We're going to add "devise" (an authentication mechanism for rails) to our gem file, as well as a few libraries.
 
-In the Gemfile, under
-
-  gem "rails", "3.2.3"
+In the Gemfile, under gem "rails", "3.2.3"
 
 Add
 
-  gem devise
+  gem 'devise'
+  gem 'execjs'
+  gem 'therubyrhino'
+  gem 'jruby-openssl'
+  gem 'activerecord-jdbcsqlite3-adapter'
 
 Then run bundler to pull in the dependecies into our gemset.
 
   bundle update
 
-Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to run some tasks specific to devise.
+Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to some setup that is specific to devise.
 
-  rails devise:install
+  rails generate devise:install
   rails generate devise:views
 
 == Models and Migrations
 
-To create our user model we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+To create our user model and migration we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
 
   rails generate
 
@@ -49,31 +51,41 @@ For our user model we'll use the devise generator.
 
 If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all forms of authentication.
 
-Now that we've added some migrations we must migrate the database.
+Now that we've added some migrations we'll create then migrate our database.
 
+  rake db:create:all
   rake db:migrate
 
-We're also going to make the our attributes pubic.  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
+Let's give it a whirl.  Check out section 2. Running TorqueBox to deployu your app and start up the server.  Then return here.
+
+
+Next thing we need to do is make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
 
   attr_accessible :email, :password, :password_confirmation, :remember_me, :name, :dob
 
 == Validations
 
-You can now test out your model in the rails console.
+You can now test out your model in the rails console.  The rails console is a ruby irb (Itegrated Ruby Shell) with your full rails enviornment loaded.  It's ideal for testing things out.  
 
   rails c
 
-  $> me = User.new(:name => "Martyn", :dob => "22/11/1984")
+You can exit the rails console at any point by issueing a quit command:
 
-What happens why you try to save me
+  quit
 
-  $> me.save!
+So, lets create a new user.
+
+  me = User.new(:name => "Martyn", :dob => "11/22/1984")
+
+What happens when you try to save me
+
+  me.save!
 
 This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
 
 
-  $> me = User.new(:name => "Martyn", :dob => "22/11/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
-  $> me.save!
+  me = User.new(:name => "Martyn", :dob => "11/22/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
+  me.save!
 
 Voila it works.  We can now be pretty confident our user works.
 
@@ -103,6 +115,8 @@ Now time for checking the age.  We could use the rails helper methods for checki
       errors.add(:age, "must be over 18")
     end
   end
+
+Reload open up a new rails console "rails c" or run reload! (This reloads your environement) from your existing IRB session:
 
 Try it out to see if its working.
 
@@ -136,10 +150,13 @@ Now lets do the same on the User side.
 
 The last association is more of a convenience method.  Really we want to deal with friends not with friendships, ActiveRecord will look at the friendship Model for an association called :friend which we defined previously.
 
-Now time to test it all out.  Lets create 2 users and make them friends with one another.
+
+Now time to test it all out.  Reload your rails environment again: reload!.
+
+Now, lets create 2 users and make them friends with one another.
 
   # User 1
-  martyn = User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :name => "martyn", :dob => "22/11/1984")
+  martyn = User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :name => "martyn", :dob => "11/22/1984")
 
   # User 2
   dave = User.create!(:email => "dave@redhat.com", :password => "password", :password_confirmation => "password", :name => "Dave", :dob => "01/01/1950")
