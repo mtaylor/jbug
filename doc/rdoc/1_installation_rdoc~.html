@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>5.torquebox_messaging - RDoc Documentation</title>
+<title>1.installation - RDoc Documentation</title>
 
 <link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
 
@@ -85,21 +85,35 @@
 
 <div id="documentation" class="description">
   
-<h2 id="label-Running+TorqueBox">Running TorqueBox</h2>
+<h2 id="label-1.+Installation">1. Installation</h2>
 
-<p>TorqueBox creates a command line tool for managing your torquebox server. 
-You can checkout the avaiable commands through:</p>
+<h3 id="label-Prerequisites">Prerequisites</h3>
 
-<pre>torquebox</pre>
+<pre>yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel java</pre>
 
-<p>You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are
-using.</p>
+<h3 id="label-RVM">RVM</h3>
 
-<pre>torquebox env</pre>
+<pre># Run as user not root
+curl -L https://get.rvm.io | bash -s stable
+source ~/.bash_profile</pre>
 
-<h3 id="label-Starting+TorqueBox">Starting TorqueBox</h3>
+<p>Check out your personal message from Wayne.  So compassionate!</p>
 
-<pre>torquebox run</pre>
+<h3 id="label-JRuby">JRuby</h3>
+
+<pre>rvm install jruby</pre>
+
+<h3 id="label-TorqueBox">TorqueBox</h3>
+
+<pre>rvm use jruby
+rvm gemset create torquebox
+rvm use jruby-1.6.7.2@torquebox
+
+jruby -J-Xmx1024m -S gem install torquebox-server</pre>
+
+<h3 id="label-Install+rails">Install rails</h3>
+
+<pre>gem install rails</pre>
 
 </div>
 

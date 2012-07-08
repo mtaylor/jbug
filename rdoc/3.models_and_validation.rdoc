@@ -20,9 +20,7 @@ First thing we're going to add to our site is a User.  We want to allow the user
 
 We're going to add "devise" (an authentication mechanism for rails) to our gem file, as well as a few libraries.
 
-In the Gemfile, under gem "rails", "3.2.3"
-
-Add
+Open up your applications Gemfile and add the following under where is says: gem "rails", "3.2.x"
 
   gem 'devise'
   gem 'execjs'
@@ -30,11 +28,11 @@ Add
   gem 'jruby-openssl'
   gem 'activerecord-jdbcsqlite3-adapter'
 
-Then run bundler to pull in the dependecies into our gemset.
+Then run bundler to pull in the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
 
   bundle update
 
-Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to some setup that is specific to devise.
+Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to do some setup that is specific to devise.  From you're terminal run the following (from you're applicaiton root directory)
 
   rails generate devise:install
   rails generate devise:views
@@ -45,18 +43,18 @@ To create our user model and migration we'll use a model generator.  We don't al
 
   rails generate
 
-For our user model we'll use the devise generator.
+To create our user model we'll use the devise model generator.
 
   rails generate devise User name:string dob:date
 
-If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all forms of authentication.
+If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all different types of authentication.  If you're interested in finding out more about what devise can do for your application check out the devise github repository: https://github.com/plataformatec/devise.git
 
 Now that we've added some migrations we'll create then migrate our database.
 
   rake db:create:all
   rake db:migrate
 
-Let's give it a whirl.  Check out section 2. Running TorqueBox to deployu your app and start up the server.  Then return here.
+Let's give it a whirl.  Check out section 2. Running TorqueBox to deploy your app and start up the server.  Then return here.
 
 
 Next thing we need to do is make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
@@ -73,7 +71,7 @@ You can exit the rails console at any point by issueing a quit command:
 
   quit
 
-So, lets create a new user.
+Lets create a new user from the rails console.
 
   me = User.new(:name => "Martyn", :dob => "11/22/1984")
 
@@ -81,17 +79,17 @@ What happens when you try to save me
 
   me.save!
 
-This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
+You should have receive a validation exception.  This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
 
 
   me = User.new(:name => "Martyn", :dob => "11/22/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
   me.save!
 
-Voila it works.  We can now be pretty confident our user works.
+Voila it works.  Congratulations you've just created your first rails model :D
 
 ==== NOTE: 
 
-Through out this practical your going to create many users.  Devise has a uniqueness validation on email address.  If you get complaints from Devise, you can just delete conflicting users.  To delete just call the destroy method on the user; you can delete all users using the command below:
+Through out this practical your going to create many users.  Devise has a uniqueness validation on email address.  If you get complaints from Devise, you can delete conflicting users.  To delete just call the destroy method on the user; you can delete all users using the command below:
 
   # Delete a single user
   me.destroy
@@ -120,17 +118,22 @@ Reload open up a new rails console "rails c" or run reload! (This reloads your e
 
 Try it out to see if its working.
 
-  User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :dob => "01/01/2010", :name => "")  
+  User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :dob => "01/01/2010", :name => "")
+
+You should receive another validation exception informing us that the name cannot be blank and the users age must be over 18.
 
 == Associations
+
+Now that you've grasped validations it's time to move on to associations.  Associations in rails are simply relationships between models.
 
 Face Blog allows users to add friends.  To do this wel'll need an extra model, we'll call it friendship.  This will be used to store mappings between users.  We'll setup model assoications to acheive the ERD show below:
 
 link:images/first_model_erd.png
 
-To start we need to create the extra friendship model.  We'll use a generator to do this.
+To start we need to create the extra friendship model.  We'll use a generator to do this, run the following from your terminal in your application root directory:
 
   rails generate model Friendship user_id:integer friend_id:string
+  rake db:migrate
 
 Note the naming convention here.  When we setup associations in rails, ActiveRecord automatically looks for a foreign key named <association_name>_id.  It's possible to override this, but we'll stick to convention for now to make it easy.
 
@@ -141,19 +144,19 @@ In the friendship model we add two associations
   belongs_to :user
   belongs_to :friend, :class_name => "User"
 
-these associations link up the two ids we store to User objects.  For each friendship we can now get the User (the owner of the friendship) and the Friend (which is another User).
+these associations link up the two ids we store to User objects.  For each friendship we can now get the User (the owner of the friendship) and the Friend (Another User).
 
 Now lets do the same on the User side.
 
   has_many :friendships
   has_many :friends, :through => :friendships
 
-The last association is more of a convenience method.  Really we want to deal with friends not with friendships, ActiveRecord will look at the friendship Model for an association called :friend which we defined previously.
+The last association is more of a convenience method.  Really we want to deal with friends not with friendships, ActiveRecord will look at the friendship Model for an association called :friend which we defined previously, and retreive the User with that ID.
 
+Now time to test it all out.  Reload your rails environment again: 'reload!' and create some users and friendships.
 
-Now time to test it all out.  Reload your rails environment again: reload!.
-
-Now, lets create 2 users and make them friends with one another.
+  # Delete all users (To prevent any conflicts)
+  User.all.each { |u| u.destroy }
 
   # User 1
   martyn = User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :name => "martyn", :dob => "11/22/1984")

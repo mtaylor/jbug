@@ -4,7 +4,7 @@
 <head>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
 
-<title>5.torquebox_messaging - RDoc Documentation</title>
+<title>2.running_torquebox - RDoc Documentation</title>
 
 <link type="text/css" media="screen" href="../rdoc.css" rel="stylesheet">
 
@@ -97,9 +97,20 @@ using.</p>
 
 <pre>torquebox env</pre>
 
-<h3 id="label-Starting+TorqueBox">Starting TorqueBox</h3>
+<h3 id="label-Deploying+You+App+and+Starting+TorqueBox">Deploying You App and Starting TorqueBox</h3>
 
-<pre>torquebox run</pre>
+<pre>make sure that JBOSS_HOME and $TORQUEBOX_HOME point to the torquebox gem.
+
+export TORQUEBOX_HOME= ~/.rvm/gems/jruby-1.6.7@jbug/gems/torquebox-server-2.0.3-java/
+export JBOSS_HOME=$TORQUEBOX_HOME/jboss</pre>
+
+<p>Deploy your application and start the torquebox server</p>
+
+<pre>torquebox deploy #From your applications root directory
+torquebox run</pre>
+
+<p>Now visit: <a href="http://localhost:8080">localhost:8080</a> your app
+should be running :)</p>
 
 </div>
 
