@@ -53,19 +53,11 @@
   
     <li class="file"><a href="../rdoc/1_installation_rdoc.html">1.installation</a>
   
-    <li class="file"><a href="../rdoc/1_installation_rdoc~.html">1.installation</a>
-  
     <li class="file"><a href="../rdoc/2_running_torquebox_rdoc.html">2.running_torquebox</a>
-  
-    <li class="file"><a href="../rdoc/2_running_torquebox_rdoc~.html">2.running_torquebox</a>
   
     <li class="file"><a href="../rdoc/3_models_and_validation_rdoc.html">3.models_and_validation</a>
   
-    <li class="file"><a href="../rdoc/3_models_and_validation_rdoc~.html">3.models_and_validation</a>
-  
     <li class="file"><a href="../rdoc/4_controller_view_rdoc.html">4.controller_view</a>
-  
-    <li class="file"><a href="../rdoc/4_controller_view_rdoc~.html">4.controller_view</a>
   
     <li class="file"><a href="../rdoc/5_torquebox_messaging_rdoc.html">5.torquebox_messaging</a>
   
@@ -85,21 +77,130 @@
 
 <div id="documentation" class="description">
   
-<h2 id="label-Running+TorqueBox">Running TorqueBox</h2>
+<h2 id="label-TorqueBox+Messaging">TorqueBox Messaging</h2>
 
-<p>TorqueBox creates a command line tool for managing your torquebox server. 
-You can checkout the avaiable commands through:</p>
+<p>Everything we’ve used so far has been strictly rails only.  Now its time
+to take a look at some of the cool features we get from TorqueBox.  We’re
+going to add the ability for users to subscribe and post to a tweets
+channel, that can be viewed by their friends.  We’ll use TorqueBox
+messaging to do all this for us.</p>
 
-<pre>torquebox</pre>
+<p>TorqueBox messaging is simply a ruby wrapper around JBoss’s super fast,
+high performance Messaging solution, HornetQ.  To find out more about
+HornetQ you can visit: <a
+href="https://www.jboss.org/hornetq">www.jboss.org/hornetq</a>  For more
+information about TorqueBox and TorquBox messaging you can checkout their
+website and documentation here: <a
+href="http://torquebox.org/">torquebox.org/</a></p>
 
-<p>You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are
-using.</p>
+<p>In order for users to subscribe to a tweets channel we’re going to create
+a queue and a message consumer.  Users can post messages to the queue and
+the consumer will pull off messages and associate them with that users
+friends.</p>
 
-<pre>torquebox env</pre>
+<p>Note: We could implement similar behaviour using topics.  For simplicity
+(and because TorqueBox doesn’t yet support subscriptions to topics
+created at runtime) we’ll stick with a queue and a message consumer to
+handle everything.</p>
 
-<h3 id="label-Starting+TorqueBox">Starting TorqueBox</h3>
+<p>undeploy you application</p>
 
-<pre>torquebox run</pre>
+<pre>torquebox undeploy</pre>
+
+<p>and cd into src/app/3/face_blog we’ll continue from here.</p>
+
+<p>The application is updated a little.  We’ve added the in an extra model
+to handle the user -&gt; message association:</p>
+
+<p><img src="../images/first_model_erd.png" /></p>
+
+<p>and we’ve also added an extra controller and content to our views for
+creating and viewing our messages.  Deploy the application and check out
+the changes.</p>
+
+<pre>torquebox deploy #From src/3/face_blog directory</pre>
+
+<h3 id="label-Adding+Messages+to+Face+Blog">Adding Messages to Face Blog</h3>
+
+<p>We need to add torquebox-messaging to our Gemfile:</p>
+
+<pre>gem 'torquebox-messaging'</pre>
+
+<p>Then run:</p>
+
+<pre>bundle install</pre>
+
+<p>Now we have the relevant libraries, we’ll start and create a message
+processor.  A message processor is basically a ruby message driven bean,
+we’ll use this to get messages from the queue and associate them with
+each user.  Create a new file tweet_processor.rb under the app/processors
+directory and add in our logic to handle the message:</p>
+
+<pre class="ruby"><span class="ruby-comment"># Note we're just printing to stdout here, check the log for messages</span>
+<span class="ruby-comment"># Once I figure out how to get the rails env available to the message processor </span>
+<span class="ruby-comment"># I'll create the messages for each user</span>
+
+<span class="ruby-keyword">class</span> <span class="ruby-constant">TweetProcessor</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">TorqueBox</span><span class="ruby-operator">::</span><span class="ruby-constant">Messaging</span><span class="ruby-operator">::</span><span class="ruby-constant">MessageProcessor</span>
+  <span class="ruby-identifier">include</span> <span class="ruby-constant">TorqueBox</span><span class="ruby-operator">::</span><span class="ruby-constant">Injectors</span>
+
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_message</span>(<span class="ruby-identifier">body</span>)
+    <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;\n\n ======================================&quot;</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-identifier">body</span>.<span class="ruby-identifier">inspect</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;===========================================&quot;</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">on_error</span>(<span class="ruby-identifier">exception</span>)
+    <span class="ruby-identifier">raise</span> <span class="ruby-identifier">exception</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Next we’ll create a new queue and associate it with out message
+processor.  This is really simply.  We just need to create a deployment
+descriptor named torquebox.yml in our applications config directory.  We
+add in the queue configuration in there.  Create a new file
+config/torquebox.rb and add in the following:</p>
+
+<pre>queues:
+  /queues/tweet:
+
+messages:
+  /queues/tweet: TweetProcessor</pre>
+
+<p>Now consumer messages is all set up we just need to create them.  Open up
+the messages controller ‘app/controllers/messages_controller.rb and add
+in some code to send the message:</p>
+
+<pre class="ruby"><span class="ruby-keyword">class</span> <span class="ruby-constant">MessagesController</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">ApplicationController</span>
+  <span class="ruby-identifier">include</span> <span class="ruby-constant">TorqueBox</span><span class="ruby-operator">::</span><span class="ruby-constant">Injectors</span>
+
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
+    <span class="ruby-identifier">message</span> = <span class="ruby-constant">Message</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">message</span>])
+
+    <span class="ruby-comment"># Lookup the queue</span>
+    <span class="ruby-identifier">queue</span> = <span class="ruby-identifier">inject</span> <span class="ruby-string">&quot;/queues/tweet&quot;</span>
+
+    <span class="ruby-comment"># Publish message</span>
+    <span class="ruby-identifier">queue</span>.<span class="ruby-identifier">publish</span>(:<span class="ruby-identifier">body</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">message</span>.<span class="ruby-identifier">body</span>, :<span class="ruby-identifier">sender_id</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>)
+
+    <span class="ruby-identifier">redirect_to</span> :<span class="ruby-identifier">back</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>Now redeploy your application and give it a whirl.</p>
+
+<pre>torquebox deploy #From src/3/final/face_blog</pre>
+
+<h3 id="label-End...">End…</h3>
+
+<p>Congratulations.  You’ve managed to incorporate HornetQ and created some
+basic messaging in your rails app.  There is much more to torquebox
+messaging, we only just scratched the surface..  To find out more check out
+the documentation here: <a href="http://torquebox.org/">torquebox.org/</a></p>
+
+<p>Well, that’s it for now…  Hopefully this practical has inspired you to
+go away and give rails and torquebox a try.  Thanks for taking part.</p>
 
 </div>
 

@@ -1,8 +1,14 @@
 class MessagesController < ApplicationController
-  def create
-    @message = Message.new(params[:message])
+  include TorqueBox::Injectors
 
-    # Send Message Here
+  def create
+    message = Message.new(params[:message])
+
+    # Lookup the queue
+    queue = inject "/queues/tweet"
+
+    # Publish message
+    queue.publish(:body => message.body, :sender_id => current_user.id)
 
     redirect_to :back
   end

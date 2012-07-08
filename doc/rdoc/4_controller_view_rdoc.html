@@ -53,19 +53,11 @@
   
     <li class="file"><a href="../rdoc/1_installation_rdoc.html">1.installation</a>
   
-    <li class="file"><a href="../rdoc/1_installation_rdoc~.html">1.installation</a>
-  
     <li class="file"><a href="../rdoc/2_running_torquebox_rdoc.html">2.running_torquebox</a>
-  
-    <li class="file"><a href="../rdoc/2_running_torquebox_rdoc~.html">2.running_torquebox</a>
   
     <li class="file"><a href="../rdoc/3_models_and_validation_rdoc.html">3.models_and_validation</a>
   
-    <li class="file"><a href="../rdoc/3_models_and_validation_rdoc~.html">3.models_and_validation</a>
-  
     <li class="file"><a href="../rdoc/4_controller_view_rdoc.html">4.controller_view</a>
-  
-    <li class="file"><a href="../rdoc/4_controller_view_rdoc~.html">4.controller_view</a>
   
     <li class="file"><a href="../rdoc/5_torquebox_messaging_rdoc.html">5.torquebox_messaging</a>
   
@@ -97,13 +89,13 @@ applications.</p>
 
 <p>Undeploy your application:</p>
 
-<pre>torquebox undeply # From your application home directory</pre>
+<pre>torquebox undeploy # From your application home directory</pre>
 
-<p>And cd into src/2/face_blog directory.</p>
+<p>And cd into src/2/face_blog directory, we’ll continue work from here.</p>
 
 <p>we’ll need to temporarily disable the devise namespace as it will
-conflict with out scaffold.  Open up config/routes.rb and comment out this
-line.</p>
+conflict with our scaffold we’re going to use to create the controllers
+and views.  Open up config/routes.rb and comment out this line.</p>
 
 <pre># devise_for :users</pre>
 
@@ -111,19 +103,21 @@ line.</p>
 tell rails to skip it, we also tell rails to skip any files that conflict
 with the generated files, such as our user model.</p>
 
-<pre>rails generate scaffold User --skip-migration --skip</pre>
+<pre>rails generate scaffold User email:string name:string dob:date --skip-migration --skip</pre>
 
-<p>You’ll notce that rails create a bunch of files.  Ignore these, for now
-We’re only intersted in the controller, views, and routes.rb.</p>
+<p>You’ll notce that rails create a bunch of files.  For now We’re only
+intersted in the controller, views, and routes.rb.</p>
 
-<p>Next thing we’ll do is add our root route.  This the route that is
+<p>Next thing we’ll do is add our root route.  This is the route that is
 initiated when a user first navigates to your application.  We’ll set
-this as the index action of our users controller.  In routes.rb add:</p>
+this to point to the index action of our users controller.  In
+config/routes.rb add the following:</p>
 
 <pre class="ruby"><span class="ruby-identifier">root</span> :<span class="ruby-identifier">to</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">'users#index'</span>
 </pre>
 
-<p>whilst we’re here we can uncomment the devise_for :users</p>
+<p>whilst we’re here we can uncomment the devise_for :users, make sure to
+put devise_for :users before resources :users.  The order is important!</p>
 
 <pre>devise_for :users</pre>
 
@@ -131,24 +125,22 @@ this as the index action of our users controller.  In routes.rb add:</p>
 
 <pre>rm -f public/index.html</pre>
 
-<p>We’ll add in some mock data so we can see the site in action.</p>
-
-<pre>rake db:seed</pre>
-
 <p>Lets start up the server and see it in action.</p>
 
 <pre>torquebox deploy
 torquebox run</pre>
 
 <p>Once torquebox has started navigate to <a
-href="http://localhost:8080">localhost:8080</a></p>
+href="http://localhost:8080">localhost:8080</a> to see it in action.  We
+don’t have any users yet so it’s not very interesting.  But don’t
+worry we’ll add in some links in a sec.</p>
 
 <p>It’s not particularly exciting right now.  But we’ll jazz it up later.</p>
 
 <p>The first thing we want to do is to add some links for logging in and out. 
 Since we want these on each page we visit, we’ll add them to the
-application layout.  Open up app/views/applicaton.html.erb and add in the
-following content in the body tag before yield.</p>
+application layout.  Open up app/views/layouts/applicaton.html.erb and add
+in the following content in the body tag before yield.</p>
 
 <pre>&lt;header&gt;
   &lt;% if user_signed_in? %&gt;
@@ -160,8 +152,12 @@ following content in the body tag before yield.</p>
   &lt;% end %&gt;
 &lt;/header&gt;</pre>
 
-<p>Devise gives us helper methods to get the current_user and to check if a
-user is logged in.</p>
+<p>We are using devise helper methods to get the current_user and to check if
+a user is logged in.  Go back to <a
+href="http://localhost:8080">localhost:8080</a> you should the links
+you’ve just created.  Notice there was no need to build, compile, deploy.
+Not that impressive really since we only updated static files.  But
+you’ll see later this works for business logic too.</p>
 
 <p>Next we’ll update the devise new registration view so that we can
 retrieve the name and dob.  Open up
@@ -178,70 +174,66 @@ under the email section.  Notice we use the form helper methods here:</p>
 users to add friends.  To handle friendships we’ll create a new
 controller:</p>
 
-<pre>rails generate controller friendships create destroy</pre>
+<pre>rails generate controller friendships</pre>
 
-<p>Since we didn’t, we’ll have to implement the actions ourselves.  Open
-up app/controllers/friendships_controller.rb and add in our business logic.</p>
+<p>We’ll implement the actions ourselves.  Open up
+app/controllers/friendships_controller.rb and add in our business logic.</p>
+
+<pre class="ruby"><span class="ruby-keyword">class</span> <span class="ruby-constant">FriendshipsController</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">ApplicationController</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
+    <span class="ruby-identifier">friend</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">id</span>])
+
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">friend</span>
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">save</span>
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">id</span>]))
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
 
 <p>create and destory are our actions.  In each action we use the params to
 retrieve the id of the resource we’re working on.  In both cases we’re
 using the params to retreive the ID of the friend, then we’re simply
-adding or removing it from our current users friends.</p>
+adding or removing it from the current users friends.</p>
 
-<p>class FriendshipsController &lt; ApplicationController</p>
-
-<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
-  <span class="ruby-identifier">friend</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">id</span>])
-
-  <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">friend</span>
-  <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span>
-<span class="ruby-keyword">end</span>
-
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
-  <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">friends</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">id</span>]))
-  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">root_path</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
-
-<p>Next let’s update the users list page and add in links for adding and
-removing friends.</p>
+<p>Next let’s update the users list page (app/views/users/list.html.erb) and
+add in links for adding and removing friends.</p>
 
 <p>We’re going to customise this page a little whilst we’re here.  We’ll
 remove the new, edit and destroy links and add in some links to handle
 adding and removing friends.  Notice we use the devise helper methods
 ‘current_user’ inline with our html to determine when to show the
 friendship links.  We also use our friendship relation to check which users
-the current_user is friends with.</p>
+the current_user is friends with and display either add or remove friend.</p>
 
-<p>&lt;table&gt;</p>
+<pre>&lt;table&gt;
+  &lt;% @users.each do |user| %&gt;
+    &lt;tr&gt;
+      &lt;!-- Here we're adding a few place holders so we can tart it up later --&gt;
+      &lt;td class='avatar'&gt;
+      &lt;/td&gt;
+      &lt;td class='info'&gt;
+        &lt;%= link_to user.name, user %&gt;
+      &lt;/td&gt;
 
-<pre>&lt;% @users.each do |user| %&gt;
-  &lt;tr&gt;
-    &lt;!-- Here we're adding a few place holders so we can tart it up later --&gt;
-    &lt;td class='avatar'&gt;
-    &lt;/td&gt;
-    &lt;td class='info'&gt;
-      &lt;%= link_to user.name, user %&gt;
-    &lt;/td&gt;
-
-    &lt;td class='links'&gt;
-      &lt;!-- check to see if a current_user exists i.e. is a user logged in --&gt;
-      &lt;% if current_user %&gt;
-        &lt;!-- If the current user is friends with the user we are working with, then display 'remove friend' else 'add friend' --&gt;
-        &lt;% if current_user.friends.include?(user) %&gt;
-          &lt;%= link_to 'Remove Friend', friendship_path(:id =&gt; user), :method =&gt; :delete %&gt;
-        &lt;% else %&gt;
-          &lt;%= link_to 'Add Friend', friendships_path(:id =&gt; user), :method =&gt; :post %&gt;
+      &lt;td class='links'&gt;
+        &lt;!-- check to see if a current_user exists i.e. is a user logged in --&gt;
+        &lt;% if current_user %&gt;
+          &lt;!-- If the current user is friends with the user we are working with, then display 'remove friend' else 'add friend' --&gt;
+          &lt;% if current_user.friends.include?(user) %&gt;
+            &lt;%= link_to 'Remove Friend', friendship_path(:id =&gt; user), :method =&gt; :delete %&gt;
+          &lt;% else %&gt;
+            &lt;%= link_to 'Add Friend', friendships_path(:id =&gt; user), :method =&gt; :post %&gt;
+          &lt;% end %&gt;
         &lt;% end %&gt;
-      &lt;% end %&gt;
-    &lt;/td&gt;
-  &lt;/tr&gt;
-&lt;% end %&gt;</pre>
-
-<p>&lt;/table&gt;</p>
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;% end %&gt;
+&lt;/table&gt;</pre>
 
 <p>Lastly We add a section on our show user page to list their friends and do
 a little tidying up.</p>
@@ -284,9 +276,8 @@ linked together through render and through exposing global variables.  We
 took a brief look at some of rails form helper methods and at the link_to
 helper.  We’ve only scratched the surface of what is possible with rails
 at this point.  You can find detailed information on rails helpers,
-controllers, routes and whole lot more here:</p>
-
-<p><a href="http://guides.rubyonrails.org/">guides.rubyonrails.org/</a></p>
+controllers, routes and whole lot more here: <a
+href="http://guides.rubyonrails.org/">guides.rubyonrails.org/</a></p>
 
 </div>
 
