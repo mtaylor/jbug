@@ -53,9 +53,15 @@
   
     <li class="file"><a href="../rdoc/1_installation_rdoc.html">1.installation</a>
   
+    <li class="file"><a href="../rdoc/1_installation_rdoc~.html">1.installation</a>
+  
     <li class="file"><a href="../rdoc/2_running_torquebox_rdoc.html">2.running_torquebox</a>
   
+    <li class="file"><a href="../rdoc/2_running_torquebox_rdoc~.html">2.running_torquebox</a>
+  
     <li class="file"><a href="../rdoc/3_models_and_validation_rdoc.html">3.models_and_validation</a>
+  
+    <li class="file"><a href="../rdoc/3_models_and_validation_rdoc~.html">3.models_and_validation</a>
   
     <li class="file"><a href="../rdoc/4_controller_view_rdoc.html">4.controller_view</a>
   
@@ -93,8 +99,10 @@ create a new social networking site called Face Blog.</p>
 easy to quickly get involved in other rails projects.  The main areas
 you’ll be working in today are:</p>
 
-<p>app/* =&gt; Contains all your MVC files config/ =&gt; Used to configure
-your app db =&gt; where migrations and schema lives</p>
+<pre class="ruby"><span class="ruby-identifier">app</span><span class="ruby-operator">/</span>* =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Contains</span> <span class="ruby-identifier">all</span> <span class="ruby-identifier">your</span> <span class="ruby-constant">MVC</span> <span class="ruby-identifier">files</span>
+<span class="ruby-identifier">config</span><span class="ruby-operator">/</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Used</span> <span class="ruby-identifier">to</span> <span class="ruby-identifier">configure</span> <span class="ruby-identifier">your</span> <span class="ruby-identifier">app</span>
+<span class="ruby-identifier">db</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">where</span> <span class="ruby-identifier">migrations</span> <span class="ruby-keyword">and</span> <span class="ruby-identifier">schema</span> <span class="ruby-identifier">lives</span>
+</pre>
 
 <h2 id="label-Adding+gems">Adding gems</h2>
 
@@ -104,15 +112,17 @@ going to write all that ourselves.  We’ll use a library to do the grunt
 work for us.</p>
 
 <p>We’re going to add “devise” (an authentication mechanism for rails)
-to our gem file</p>
+to our gem file, as well as a few libraries.</p>
 
-<p>In the Gemfile, under</p>
-
-<pre>gem &quot;rails&quot;, &quot;3.2.3&quot;</pre>
+<p>In the Gemfile, under gem “rails”, “3.2.3”</p>
 
 <p>Add</p>
 
-<pre>gem devise</pre>
+<pre>gem 'devise'
+gem 'execjs'
+gem 'therubyrhino'
+gem 'jruby-openssl'
+gem 'activerecord-jdbcsqlite3-adapter'</pre>
 
 <p>Then run bundler to pull in the dependecies into our gemset.</p>
 
@@ -121,17 +131,17 @@ to our gem file</p>
 <p>Devise is a rails engine (<a
 href="http://guides.rubyonrails.org/engines.html">guides.rubyonrails.org/engines.html</a>),
 don’t worry about what engines are right now, we just need to know that
-we need to run some tasks specific to devise.</p>
+we need to some setup that is specific to devise.</p>
 
-<pre>rails devise:install
+<pre>rails generate devise:install
 rails generate devise:views</pre>
 
 <h2 id="label-Models+and+Migrations">Models and Migrations</h2>
 
-<p>To create our user model we’ll use a model generator.  We don’t always
-have to stick to the generators that come with rails.  3rd party libraries
-can also offer generators.  To see which generators you have avaiable to
-you.  You can run</p>
+<p>To create our user model and migration we’ll use a model generator.  We
+don’t always have to stick to the generators that come with rails.  3rd
+party libraries can also offer generators.  To see which generators you
+have avaiable to you.  You can run</p>
 
 <pre>rails generate</pre>
 
@@ -143,36 +153,50 @@ you.  You can run</p>
 see the extra information devise has added to support all forms of
 authentication.</p>
 
-<p>Now that we’ve added some migrations we must migrate the database.</p>
+<p>Now that we’ve added some migrations we’ll create then migrate our
+database.</p>
 
-<pre>rake db:migrate</pre>
+<pre>rake db:create:all
+rake db:migrate</pre>
 
-<p>We’re also going to make the our attributes pubic.  We do this by setting
-the attr_accessible method offered by ActiveRecord::Base.  Open up the
-model app/models/user.rb and add in :name and :dob to the attr_accessible
-method:</p>
+<p>Let’s give it a whirl.  Check out section 2. Running TorqueBox to deployu
+your app and start up the server.  Then return here.</p>
+
+<p>Next thing we need to do is make the our dob and name attributes pubic
+(This is so we can mass-assign them later in our controller).  We do this
+by setting the attr_accessible method offered by ActiveRecord::Base.  Open
+up the model app/models/user.rb and add in :name and :dob to the
+attr_accessible method:</p>
 
 <pre>attr_accessible :email, :password, :password_confirmation, :remember_me, :name, :dob</pre>
 
 <h2 id="label-Validations">Validations</h2>
 
-<p>You can now test out your model in the rails console.</p>
+<p>You can now test out your model in the rails console.  The rails console is
+a ruby irb (Itegrated Ruby Shell) with your full rails enviornment loaded. 
+It’s ideal for testing things out.</p>
 
-<pre class="ruby"><span class="ruby-identifier">rails</span> <span class="ruby-identifier">c</span>
+<pre>rails c</pre>
 
-<span class="ruby-identifier">$&gt;</span> <span class="ruby-identifier">me</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;22/11/1984&quot;</span>)
+<p>You can exit the rails console at any point by issueing a quit command:</p>
+
+<pre>quit</pre>
+
+<p>So, lets create a new user.</p>
+
+<pre class="ruby"><span class="ruby-identifier">me</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;11/22/1984&quot;</span>)
 </pre>
 
-<p>What happens why you try to save me</p>
+<p>What happens when you try to save me</p>
 
-<pre>$&gt; me.save!</pre>
+<pre>me.save!</pre>
 
 <p>This happens because devise has added in some extra validation to our
 model.  We must enter an email, password, password_confirmation when
 creating a new user.  Let’s try again.</p>
 
-<pre class="ruby"><span class="ruby-identifier">$&gt;</span> <span class="ruby-identifier">me</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;22/11/1984&quot;</span>, :<span class="ruby-identifier">email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;mtaylor@redhat.com&quot;</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">password_confirmation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>)
-<span class="ruby-identifier">$&gt;</span> <span class="ruby-identifier">me</span>.<span class="ruby-identifier">save!</span>
+<pre class="ruby"><span class="ruby-identifier">me</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span>(:<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;11/22/1984&quot;</span>, :<span class="ruby-identifier">email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;mtaylor@redhat.com&quot;</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">password_confirmation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>)
+<span class="ruby-identifier">me</span>.<span class="ruby-identifier">save!</span>
 </pre>
 
 <p>Voila it works.  We can now be pretty confident our user works.</p>
@@ -215,6 +239,9 @@ stop underage users signing up.</p>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span>
 </pre>
+
+<p>Reload open up a new rails console “rails c” or run reload! (This
+reloads your environement) from your existing IRB session:</p>
 
 <p>Try it out to see if its working.</p>
 
@@ -263,11 +290,12 @@ deal with friends not with friendships, ActiveRecord will look at the
 friendship Model for an association called :friend which we defined
 previously.</p>
 
-<p>Now time to test it all out.  Lets create 2 users and make them friends
-with one another.</p>
+<p>Now time to test it all out.  Reload your rails environment again: reload!.</p>
+
+<p>Now, lets create 2 users and make them friends with one another.</p>
 
 <pre class="ruby"><span class="ruby-comment"># User 1</span>
-<span class="ruby-identifier">martyn</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">create!</span>(:<span class="ruby-identifier">email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;mtaylor@redhat.com&quot;</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">password_confirmation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;22/11/1984&quot;</span>)
+<span class="ruby-identifier">martyn</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">create!</span>(:<span class="ruby-identifier">email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;mtaylor@redhat.com&quot;</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">password_confirmation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;martyn&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;11/22/1984&quot;</span>)
 
 <span class="ruby-comment"># User 2</span>
 <span class="ruby-identifier">dave</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">create!</span>(:<span class="ruby-identifier">email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;dave@redhat.com&quot;</span>, :<span class="ruby-identifier">password</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">password_confirmation</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;password&quot;</span>, :<span class="ruby-identifier">name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Dave&quot;</span>, :<span class="ruby-identifier">dob</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;01/01/1950&quot;</span>)
