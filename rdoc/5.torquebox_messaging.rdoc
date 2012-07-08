@@ -1,0 +1,40 @@
+
+
+
+
+== Running TorqueBox
+
+TorqueBox creates a command line tool for managing your torquebox server.  You can checkout the avaiable commands through:
+
+  torquebox
+
+You can also checkout which versions of JBOSS, JRUBY and TORQUEBOX you are using.
+
+  torquebox env
+
+=== Starting TorqueBox
+
+  torquebox run
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

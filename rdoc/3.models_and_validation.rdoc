@@ -1,0 +1,164 @@
+== 2. Face Blog - Models and Validation
+
+Now that you have everything installed, you're ready to rock n roll.  It's time to create your first rails application.  You're going to create a new social networking site called Face Blog.
+
+== Creating a Rails App
+
+First thing you need to do is create a rails application.
+
+  rails new face_blog
+
+Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects.  The main areas you'll be working in today are:
+
+app/* => Contains all your MVC files
+config/ => Used to configure your app
+db => where migrations and schema lives
+
+== Adding gems
+
+First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
+
+We're going to add "devise" (an authentication mechanism for rails) to our gem file
+
+In the Gemfile, under
+
+  gem "rails", "3.2.3"
+
+Add
+
+  gem devise
+
+Then run bundler to pull in the dependecies into our gemset.
+
+  bundle update
+
+Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to run some tasks specific to devise.
+
+  rails devise:install
+  rails generate devise:views
+
+== Models and Migrations
+
+To create our user model we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+
+  rails generate
+
+For our user model we'll use the devise generator.
+
+  rails generate devise User name:string dob:date
+
+If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all forms of authentication.
+
+Now that we've added some migrations we must migrate the database.
+
+  rake db:migrate
+
+We're also going to make the our attributes pubic.  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
+
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :name, :dob
+
+== Validations
+
+You can now test out your model in the rails console.
+
+  rails c
+
+  $> me = User.new(:name => "Martyn", :dob => "22/11/1984")
+
+What happens why you try to save me
+
+  $> me.save!
+
+This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
+
+
+  $> me = User.new(:name => "Martyn", :dob => "22/11/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
+  $> me.save!
+
+Voila it works.  We can now be pretty confident our user works.
+
+==== NOTE: 
+
+Through out this practical your going to create many users.  Devise has a uniqueness validation on email address.  If you get complaints from Devise, you can just delete conflicting users.  To delete just call the destroy method on the user; you can delete all users using the command below:
+
+  # Delete a single user
+  me.destroy
+
+  # Delete All Users
+  User.all.each { |u| u.destroy }
+
+Now we've seen devise validations in action, its time to add our own.  Face Blog is for over 18s only and user must supply a name.  Let's start by adding validation to make sure name is not empty.  Open up the user model, add in name validation.
+
+  validates :name, :presence => true, :length => { :minimum => 2 }
+
+This makes sure that a user supplies a name and its length greater than or equal to 2
+
+Now time for checking the age.  We could use the rails helper methods for checking the age.  But instead we're going to create a custom method to stop underage users signing up.
+
+  validates :dob, :presence => true
+  validate :must_be_an_adult
+
+  def must_be_an_adult
+    if (Time.now - 18.years) < dob
+      errors.add(:age, "must be over 18")
+    end
+  end
+
+Try it out to see if its working.
+
+  User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :dob => "01/01/2010", :name => "")  
+
+== Associations
+
+Face Blog allows users to add friends.  To do this wel'll need an extra model, we'll call it friendship.  This will be used to store mappings between users.  We'll setup model assoications to acheive the ERD show below:
+
+link:images/first_model_erd.png
+
+To start we need to create the extra friendship model.  We'll use a generator to do this.
+
+  rails generate model Friendship user_id:integer friend_id:string
+
+Note the naming convention here.  When we setup associations in rails, ActiveRecord automatically looks for a foreign key named <association_name>_id.  It's possible to override this, but we'll stick to convention for now to make it easy.
+
+Next we need to add in the association into the models.
+
+In the friendship model we add two associations
+
+  belongs_to :user
+  belongs_to :friend, :class_name => "User"
+
+these associations link up the two ids we store to User objects.  For each friendship we can now get the User (the owner of the friendship) and the Friend (which is another User).
+
+Now lets do the same on the User side.
+
+  has_many :friendships
+  has_many :friends, :through => :friendships
+
+The last association is more of a convenience method.  Really we want to deal with friends not with friendships, ActiveRecord will look at the friendship Model for an association called :friend which we defined previously.
+
+Now time to test it all out.  Lets create 2 users and make them friends with one another.
+
+  # User 1
+  martyn = User.create!(:email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password", :name => "martyn", :dob => "22/11/1984")
+
+  # User 2
+  dave = User.create!(:email => "dave@redhat.com", :password => "password", :password_confirmation => "password", :name => "Dave", :dob => "01/01/1950")
+
+  # Add dave as a friend
+  martyn.friends << dave
+  martyn.save!
+
+  # Check the relation
+  martyn.friends
+
+You might have noticed that dave still has no friends.  This is becuase we only set up the association in one direction.  We could add the inverse assoications to the user model, which would solve this issue.  But for the sake of simplicity we'll simply add an extra friendship entry.
+
+  # Add Martyn as Daves friend
+  dave.friends << martyn
+  dave.save!  
+  
+=== Overview
+
+There you have it.  You've successfully managed to create new models, migrations add validation and setup associations.  All in the space of a few minutes.  Next we'll start building up the Controller and View side of our applicaton.  We're going to need a ruby server running to test this.  If you haven't already, check out the Running TorqueBox section.  If your having trouble with TorqueBox don't worry you can just use the default ruby server for testing purposes.  To start it:
+
+  rails s

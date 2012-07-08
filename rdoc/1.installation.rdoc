@@ -1,0 +1,29 @@
+== 1. Installation
+
+=== Prerequisites
+
+  yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel java
+
+=== RVM
+
+  # Run as user not root
+  curl -L https://get.rvm.io | bash -s stable
+  source ~/.bash_profile
+
+Check out your personal message from Wayne.  So compassionate!
+
+=== JRuby
+
+  rvm install jruby
+
+=== TorqueBox
+
+  rvm use jruby
+  rvm gemset create torquebox
+  rvm use jruby-1.6.7.2@torquebox
+
+  jruby -J-Xmx1024m -S gem install torquebox-server
+
+=== Install rails
+
+  gem install rails
