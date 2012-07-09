@@ -34,8 +34,10 @@
       <% @user.messages.reverse.each do | message | %>
       <tr class='message'>
         <td class="message_avatar"></td>
-        <td class="message_details"><%= message.user.name %></td>
+        <td class="message_details"><%= message.sender.name %></td>
         <td class="message_body"><%= message.body %></td>
+        <td class="links">
+          <%= link_to 'Delete', message_path(:id => message), :method => :delete %>        </td>
       </tr>
       <% end %>
     </table>

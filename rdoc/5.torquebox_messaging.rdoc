@@ -20,7 +20,7 @@ link:images/model_erd.png
 
 and we've also added an extra controller and content to our views for creating and viewing our messages.  Deploy the application and check out the changes.
 
-  torquebox deploy #From src/3/face_blog directory
+  torquebox deploy # from src/3/face_blog directory
 
 === Adding Messages to Face Blog
 
@@ -34,17 +34,15 @@ Then run:
 
 Now we have the relevant libraries, we'll start and create a message processor.  A message processor is basically a ruby message driven bean, we'll use this to get messages from the queue and associate them with each user.  Create a new file tweet_processor.rb under the app/processors directory and add in our logic to handle the message:
 
-  # Note we're just printing to stdout here, check the log for messages
-  # Once I figure out how to get the rails env available to the message processor 
-  # I'll create the messages for each user
 
   class TweetProcessor < TorqueBox::Messaging::MessageProcessor
-    include TorqueBox::Injectors
 
-    def on_message(body)
-      puts "\n\n ======================================"
-      puts body.inspect
-      puts "==========================================="
+    def on_message(message)
+      user = User.find(message[:sender_id])
+      (user.friends + [user]).each do |friend|
+        friend.messages << Message.new(:body => message[:body], :sender => user)
+        friend.save!
+      end
     end
 
     def on_error(exception)
@@ -60,28 +58,18 @@ Next we'll create a new queue and associate it with out message processor.  This
   messages:
     /queues/tweet: TweetProcessor
 
-Now consumer messages is all set up we just need to create them.  Open up the messages controller 'app/controllers/messages_controller.rb and add in some code to send the message:
+Now consumer messages is all set up we just need to create them.  Open up the messages controller 'app/controllers/messages_controller.rb and add in the code to send a message in the create action.  You'll need to add it just before the redirect_to.
 
-  class MessagesController < ApplicationController
-    include TorqueBox::Injectors
+    # Lookup the queue
+    queue = inject "/queues/tweet"
 
-    def create
-      message = Message.new(params[:message])
-
-      # Lookup the queue
-      queue = inject "/queues/tweet"
-
-      # Publish message
-      queue.publish(:body => message.body, :sender_id => current_user.id)
-
-      redirect_to :back
-    end
-  end
+    # Publish message
+    queue.publish(:body => message.body, :sender_id => current_user.id)
 
 
 Now redeploy your application and give it a whirl.
 
-  torquebox deploy #From src/3/final/face_blog
+  torquebox deploy # from src/3/final/face_blog
 
 === End...
 

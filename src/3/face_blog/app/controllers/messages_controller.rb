@@ -1,9 +1,17 @@
 class MessagesController < ApplicationController
+  include TorqueBox::Injectors
+
   def create
-    @message = Message.new(params[:message])
+    message = Message.new(params[:message])
 
-    # Send Message Here
+    # Enter Messaging Code Here
 
-    redirect_to :back
+    redirect_to user_path(current_user)
   end
+
+  def destroy
+    Message.destroy(params[:id])
+    redirect_to user_path(current_user)
+  end
+  
 end

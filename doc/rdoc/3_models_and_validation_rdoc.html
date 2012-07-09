@@ -57,6 +57,8 @@
   
     <li class="file"><a href="../rdoc/3_models_and_validation_rdoc.html">3.models_and_validation</a>
   
+    <li class="file"><a href="../rdoc/3_models_and_validation_rdoc~.html">3.models_and_validation</a>
+  
     <li class="file"><a href="../rdoc/4_controller_view_rdoc.html">4.controller_view</a>
   
     <li class="file"><a href="../rdoc/5_torquebox_messaging_rdoc.html">5.torquebox_messaging</a>
@@ -125,7 +127,7 @@ gem 'activerecord-jdbcsqlite3-adapter'</pre>
 <p>Then run bundler to pull in the dependecies into our gemset.  (Make sure
 you’re in your applicaion root directory)</p>
 
-<pre>bundle update</pre>
+<pre>bundle install</pre>
 
 <p>Devise is a rails engine (<a
 href="http://guides.rubyonrails.org/engines.html">guides.rubyonrails.org/engines.html</a>),
@@ -136,12 +138,43 @@ terminal run the following (from you’re applicaiton root directory)</p>
 <pre>rails generate devise:install
 rails generate devise:views</pre>
 
+<h2 id="label-Testing+our+app">Testing our app</h2>
+
+<p>Before we continue, let’s make sure we have the correct dependencies and
+that we can deploy our rails app on TorqueBox.  Start TorqueBox and deploy
+your applicaton.  If all goes well you should be able to see the rails
+landing page.  For information on how to start TorqueBox and to deploy your
+app check out section 2. Running TorqueBox.  Be sure to return here when
+your done.</p>
+
+<p>For the next section we won’t be needing to test things in TorqueBox,
+we’ll use the rails console.  The rails console is a ruby irb (Itegrated
+Ruby Shell) with your full rails application enviornment loaded.  It’s
+ideal for testing models, validation and just for trying things out.  To
+start the rails console type:</p>
+
+<pre>rails c # from you applicaton root directory</pre>
+
+<p>You can now issue ruby commands.  Just try:</p>
+
+<pre>1 + 1</pre>
+
+<p>If you make changes to your model, database, controllers etc… You’ll
+need to reload the enviroment.  To do that issue the reload! command:</p>
+
+<pre>reload!</pre>
+
+<p>To close the rails console type:</p>
+
+<pre>quit</pre>
+
 <h2 id="label-Models+and+Migrations">Models and Migrations</h2>
 
-<p>To create our user model and migration we’ll use a model generator.  We
-don’t always have to stick to the generators that come with rails.  3rd
-party libraries can also offer generators.  To see which generators you
-have avaiable to you.  You can run</p>
+<p>To create our user model and migration (migrations are the mapping between
+a model and the database) we’ll use a model generator.  We don’t always
+have to stick to the generators that come with rails.  3rd party libraries
+can also offer generators.  To see which generators you have avaiable to
+you.  You can run</p>
 
 <pre>rails generate</pre>
 
@@ -149,10 +182,9 @@ have avaiable to you.  You can run</p>
 
 <pre>rails generate devise User name:string dob:date</pre>
 
-<p>Migrations are the mapping between the model and the database.  If you look
-at the migration that devise created (under db/migrate) you can see that
-devise created a new table and added some information such as email,
-password + the fields we specified (name and dob) devise uses this
+<p>If you look at the migration that devise created (under db/migrate) you can
+see that devise created a new table and added some information such as
+email, password + the fields we specified (name and dob) devise uses this
 information to perform a range of authentication.  If you’re interested
 in finding out more about what devise can do for your application check out
 the devise github repository: <a
@@ -164,9 +196,6 @@ databases and migrate.</p>
 <pre>rake db:create:all
 rake db:migrate</pre>
 
-<p>Let’s give it a whirl.  Check out section 2. Running TorqueBox to deploy
-your app and start up the server.  Then return here.</p>
-
 <p>Next thing we need to do is make the our dob and name attributes pubic
 (This is so we can mass-assign them later in our controller).  We do this
 by setting the attr_accessible method offered by ActiveRecord::Base.  Open
@@ -177,9 +206,7 @@ attr_accessible method:</p>
 
 <h2 id="label-Validations">Validations</h2>
 
-<p>You can now test out your model in the rails console.  The rails console is
-a ruby irb (Itegrated Ruby Shell) with your full rails enviornment loaded. 
-It’s ideal for testing things out.</p>
+<p>You can now test out your model in the rails console.</p>
 
 <pre>rails c</pre>
 

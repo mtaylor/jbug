@@ -10,6 +10,12 @@ class MessagesController < ApplicationController
     # Publish message
     queue.publish(:body => message.body, :sender_id => current_user.id)
 
-    redirect_to :back
+    redirect_to user_path(current_user)
   end
+
+  def destroy
+    Message.destroy(params[:id])
+    redirect_to user_path(current_user)
+  end
+  
 end
