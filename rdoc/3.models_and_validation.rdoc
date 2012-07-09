@@ -4,21 +4,25 @@ Now that you have everything installed, you're ready to rock n roll.  It's time 
 
 == Creating a Rails App
 
-First thing you need to do is create a rails application.
+- cd into the src/1 directory.  We'll work from here.
+
+First thing you need to do is create a new rails application.  Well that's pretty easy.
 
   rails new face_blog
 
-Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects.  The main areas you'll be working in today are:
+Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects, since you already know your way around.
 
-  app/* => Contains all your MVC files
-  config/ => Used to configure your app
-  db => where migrations and schema lives
+The main areas you'll be working in today are:
+
+  app/       # This cContains all your MVC files
+  config/    # Used to configure your app
+  db/        # Where migrations and schema lives
 
 == Adding gems
 
 First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
 
-We're going to add "devise" (an authentication mechanism for rails) to our gem file, as well as a few libraries.
+We're going to add "devise" (an authentication mechanism for rails) to our application, as well as a few extra libraries that we'll need later.
 
 All the libraries your application dependes on are specified in your applicatons Gemfile (found in your applicaitons root directory).  Let's add in devise and a couple of other dependencies such as a javascript runtime, openssl and jdbc adapter sqlite3.
 
@@ -30,9 +34,14 @@ Open up your applications Gemfile and add the following under where is says: gem
   gem 'jruby-openssl'
   gem 'activerecord-jdbcsqlite3-adapter'
 
-Then run bundler to pull in the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
+Notice the convention here.  The gem name is on the left followed by the version.  You can set up multiple environments in rails.  Such as development, prodcution, test.  You can specify gems for just one environment.  For example you might want to add postgres libraries for production, but for development we want to use 'sqlite3'
+
+Now run bundler to pull in the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
 
   bundle install
+
+Note: a gemset is a feature of rvm.  It allows us to create a groups of gems that are encapsulated to prevent conflicts.
+
 
 Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to do some setup that is specific to devise.  From you're terminal run the following (from you're applicaiton root directory)
 
@@ -43,6 +52,8 @@ Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't wor
 == Testing our app
 
 Before we continue, let's make sure we have the correct dependencies and that we can deploy our rails app on TorqueBox.  Start TorqueBox and deploy your applicaton.  If all goes well you should be able to see the rails landing page.  For information on how to start TorqueBox and to deploy your app check out section 2. Running TorqueBox.  Be sure to return here when your done.
+
+== Rails Console
 
 For the next section we won't be needing to test things in TorqueBox, we'll use the rails console.  The rails console is a ruby irb (Itegrated Ruby Shell) with your full rails application enviornment loaded.  It's ideal for testing models, validation and just for trying things out.  To start the rails console type:
 
@@ -62,7 +73,9 @@ To close the rails console type:
 
 == Models and Migrations
 
-To create our user model and migration (migrations are the mapping between a model and the database) we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+So we started off by saying we were going to add a user.  Let's get to the chace.
+
+To create our user model and migration we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
 
   rails generate
 
@@ -70,12 +83,14 @@ To create our user model we'll use the devise model generator.
 
   rails generate devise User name:string dob:date
 
-If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob) devise uses this information to perform a range of authentication.  If you're interested in finding out more about what devise can do for your application check out the devise github repository: https://github.com/plataformatec/devise.git
+Note: A rails migration is used to make changes to your database.  If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob) devise uses this information to perform a range of authentication.  
 
-Now that we've added some migrations we'll create the applications databases and migrate.
+Migrations are timestamped and ran in order.  So you can create a database then add an extra field later if you so wish.  Anyone else using your app simply runs the migrations and just that extra field is added.
 
-  rake db:create:all
-  rake db:migrate
+So, now that we've added some migrations we'll create the applications databases and migrate.
+
+  rake db:create:all # Creates databases for test, production, development
+  rake db:migrate    # Migrates the current rails env database: development
 
 Next thing we need to do is make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
 
