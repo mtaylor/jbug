@@ -84,19 +84,24 @@ It’s time to create your first rails application.  You’re going to
 create a new social networking site called Face Blog.</p>
 
 <h2 id="label-Creating+a+Rails+App">Creating a Rails App</h2>
+<ul><li>
+<p>cd into the src/1 directory.  We’ll work from here.</p>
+</li></ul>
 
-<p>First thing you need to do is create a rails application.</p>
+<p>First thing you need to do is create a new rails application.  Well
+that’s pretty easy.</p>
 
 <pre>rails new face_blog</pre>
 
 <p>Notice the file structure.  Every rails app looks the same.  This makes it
-easy to quickly get involved in other rails projects.  The main areas
-you’ll be working in today are:</p>
+easy to quickly get involved in other rails projects, since you already
+know your way around.</p>
 
-<pre class="ruby"><span class="ruby-identifier">app</span><span class="ruby-operator">/</span>* =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Contains</span> <span class="ruby-identifier">all</span> <span class="ruby-identifier">your</span> <span class="ruby-constant">MVC</span> <span class="ruby-identifier">files</span>
-<span class="ruby-identifier">config</span><span class="ruby-operator">/</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Used</span> <span class="ruby-identifier">to</span> <span class="ruby-identifier">configure</span> <span class="ruby-identifier">your</span> <span class="ruby-identifier">app</span>
-<span class="ruby-identifier">db</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">where</span> <span class="ruby-identifier">migrations</span> <span class="ruby-keyword">and</span> <span class="ruby-identifier">schema</span> <span class="ruby-identifier">lives</span>
-</pre>
+<p>The main areas you’ll be working in today are:</p>
+
+<pre>app/       # This cContains all your MVC files
+config/    # Used to configure your app
+db/        # Where migrations and schema lives</pre>
 
 <h2 id="label-Adding+gems">Adding gems</h2>
 
@@ -106,7 +111,8 @@ going to write all that ourselves.  We’ll use a library to do the grunt
 work for us.</p>
 
 <p>We’re going to add “devise” (an authentication mechanism for rails)
-to our gem file, as well as a few libraries.</p>
+to our application, as well as a few extra libraries that we’ll need
+later.</p>
 
 <p>All the libraries your application dependes on are specified in your
 applicatons Gemfile (found in your applicaitons root directory).  Let’s
@@ -122,10 +128,19 @@ gem 'therubyrhino'
 gem 'jruby-openssl'
 gem 'activerecord-jdbcsqlite3-adapter'</pre>
 
-<p>Then run bundler to pull in the dependecies into our gemset.  (Make sure
+<p>Notice the convention here.  The gem name is on the left followed by the
+version.  You can set up multiple environments in rails.  Such as
+development, prodcution, test.  You can specify gems for just one
+environment.  For example you might want to add postgres libraries for
+production, but for development we want to use ‘sqlite3’</p>
+
+<p>Now run bundler to pull in the dependecies into our gemset.  (Make sure
 you’re in your applicaion root directory)</p>
 
 <pre>bundle install</pre>
+
+<p>Note: a gemset is a feature of rvm.  It allows us to create a groups of
+gems that are encapsulated to prevent conflicts.</p>
 
 <p>Devise is a rails engine (<a
 href="http://guides.rubyonrails.org/engines.html">guides.rubyonrails.org/engines.html</a>),
@@ -144,6 +159,8 @@ your applicaton.  If all goes well you should be able to see the rails
 landing page.  For information on how to start TorqueBox and to deploy your
 app check out section 2. Running TorqueBox.  Be sure to return here when
 your done.</p>
+
+<h2 id="label-Rails+Console">Rails Console</h2>
 
 <p>For the next section we won’t be needing to test things in TorqueBox,
 we’ll use the rails console.  The rails console is a ruby irb (Itegrated
@@ -168,11 +185,13 @@ need to reload the enviroment.  To do that issue the reload! command:</p>
 
 <h2 id="label-Models+and+Migrations">Models and Migrations</h2>
 
-<p>To create our user model and migration (migrations are the mapping between
-a model and the database) we’ll use a model generator.  We don’t always
-have to stick to the generators that come with rails.  3rd party libraries
-can also offer generators.  To see which generators you have avaiable to
-you.  You can run</p>
+<p>So we started off by saying we were going to add a user.  Let’s get to
+the chace.</p>
+
+<p>To create our user model and migration we’ll use a model generator.  We
+don’t always have to stick to the generators that come with rails.  3rd
+party libraries can also offer generators.  To see which generators you
+have avaiable to you.  You can run</p>
 
 <pre>rails generate</pre>
 
@@ -180,19 +199,21 @@ you.  You can run</p>
 
 <pre>rails generate devise User name:string dob:date</pre>
 
-<p>If you look at the migration that devise created (under db/migrate) you can
-see that devise created a new table and added some information such as
-email, password + the fields we specified (name and dob) devise uses this
-information to perform a range of authentication.  If you’re interested
-in finding out more about what devise can do for your application check out
-the devise github repository: <a
-href="https://github.com/plataformatec/devise.git">github.com/plataformatec/devise.git</a></p>
+<p>Note: A rails migration is used to make changes to your database.  If you
+look at the migration that devise created (under db/migrate) you can see
+that devise created a new table and added some information such as email,
+password + the fields we specified (name and dob) devise uses this
+information to perform a range of authentication.</p>
 
-<p>Now that we’ve added some migrations we’ll create the applications
+<p>Migrations are timestamped and ran in order.  So you can create a database
+then add an extra field later if you so wish.  Anyone else using your app
+simply runs the migrations and just that extra field is added.</p>
+
+<p>So, now that we’ve added some migrations we’ll create the applications
 databases and migrate.</p>
 
-<pre>rake db:create:all
-rake db:migrate</pre>
+<pre>rake db:create:all # Creates databases for test, production, development
+rake db:migrate    # Migrates the current rails env database: development</pre>
 
 <p>Next thing we need to do is make the our dob and name attributes pubic
 (This is so we can mass-assign them later in our controller).  We do this
