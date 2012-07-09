@@ -1,4 +1,4 @@
-== TorqueBox Messaging
+= TorqueBox Messaging
 
 Everything we've used so far has been strictly rails only.  Now its time to take a look at some of the cool features we get from TorqueBox.  We're going to add the ability for users to subscribe and post to a tweets channel, that can be viewed by their friends.  We'll use TorqueBox messaging to do all this for us.  
 

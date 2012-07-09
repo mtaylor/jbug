@@ -77,7 +77,7 @@
 
 <div id="documentation" class="description">
   
-<h2 id="label-Running+TorqueBox">Running TorqueBox</h2>
+<h1 id="label-Running+TorqueBox">Running TorqueBox</h1>
 
 <p>TorqueBox creates a command line tool for managing your torquebox server. 
 You can checkout the avaiable commands through:</p>
@@ -89,20 +89,32 @@ using.</p>
 
 <pre>torquebox env</pre>
 
-<h3 id="label-Deploying+You+App+and+Starting+TorqueBox">Deploying You App and Starting TorqueBox</h3>
+<h3 id="label-Starting+TorqueBox">Starting TorqueBox</h3>
+
+<p>Instructions for deploying a rails application on torquebox.  To be used
+after you’ve created your rails app.</p>
 
 <p>Make sure that JBOSS_HOME and $TORQUEBOX_HOME point to the torquebox gem.</p>
 
 <pre>export TORQUEBOX_HOME= ~/.rvm/gems/jruby-1.6.7@jbug/gems/torquebox-server-2.0.3-java/
 export JBOSS_HOME=$TORQUEBOX_HOME/jboss</pre>
 
-<p>Deploy your application and start the torquebox server</p>
+<p>Start the torquebox server</p>
 
-<pre>torquebox deploy #From your applications root directory
-torquebox run</pre>
+<pre>torquebox run</pre>
 
-<p>Now visit: <a href="http://localhost:8080">localhost:8080</a> your app is
-now deployed :)</p>
+<p>Now visit: <a href="http://localhost:9990">localhost:9990</a> to make sure
+its deployed.</p>
+
+<h3 id="label-Deploying+an+applicaiton">Deploying an applicaiton</h3>
+
+<p>Once you’ve created a rails applicaiton you can deploying it by issueing
+the following command.</p>
+
+<pre>torquebox deploy #From your applications root directory</pre>
+
+<p>You should be able to see your rails app here: <a
+href="http://localhost:8080">localhost:8080</a></p>
 
 </div>
 

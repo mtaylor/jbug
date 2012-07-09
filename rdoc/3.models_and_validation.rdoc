@@ -1,4 +1,4 @@
-== 2. Face Blog - Models and Validation
+= Face Blog - Models and Validation
 
 Now that you have everything installed, you're ready to rock n roll.  It's time to create your first rails application.  You're going to create a new social networking site called Face Blog.
 
@@ -20,6 +20,8 @@ First thing we're going to add to our site is a User.  We want to allow the user
 
 We're going to add "devise" (an authentication mechanism for rails) to our gem file, as well as a few libraries.
 
+All the libraries your application dependes on are specified in your applicatons Gemfile (found in your applicaitons root directory).  Let's add in devise and a couple of other dependencies such as a javascript runtime, openssl and jdbc adapter sqlite3.
+
 Open up your applications Gemfile and add the following under where is says: gem "rails", "3.2.x"
 
   gem 'devise'
@@ -30,16 +32,37 @@ Open up your applications Gemfile and add the following under where is says: gem
 
 Then run bundler to pull in the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
 
-  bundle update
+  bundle install
 
 Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to do some setup that is specific to devise.  From you're terminal run the following (from you're applicaiton root directory)
 
   rails generate devise:install
   rails generate devise:views
 
+
+== Testing our app
+
+Before we continue, let's make sure we have the correct dependencies and that we can deploy our rails app on TorqueBox.  Start TorqueBox and deploy your applicaton.  If all goes well you should be able to see the rails landing page.  For information on how to start TorqueBox and to deploy your app check out section 2. Running TorqueBox.  Be sure to return here when your done.
+
+For the next section we won't be needing to test things in TorqueBox, we'll use the rails console.  The rails console is a ruby irb (Itegrated Ruby Shell) with your full rails application enviornment loaded.  It's ideal for testing models, validation and just for trying things out.  To start the rails console type:
+
+  rails c # from you applicaton root directory
+
+You can now issue ruby commands.  Just try: 
+
+  1 + 1
+
+If you make changes to your model, database, controllers etc... You'll need to reload the enviroment.  To do that issue the reload! command:
+
+  reload!
+
+To close the rails console type:
+
+  quit
+
 == Models and Migrations
 
-To create our user model and migration we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+To create our user model and migration (migrations are the mapping between a model and the database) we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
 
   rails generate
 
@@ -47,15 +70,12 @@ To create our user model we'll use the devise model generator.
 
   rails generate devise User name:string dob:date
 
-If you look at the migration that devise created (under db/migrate) you can see the extra information devise has added to support all different types of authentication.  If you're interested in finding out more about what devise can do for your application check out the devise github repository: https://github.com/plataformatec/devise.git
+If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob) devise uses this information to perform a range of authentication.  If you're interested in finding out more about what devise can do for your application check out the devise github repository: https://github.com/plataformatec/devise.git
 
-Now that we've added some migrations we'll create then migrate our database.
+Now that we've added some migrations we'll create the applications databases and migrate.
 
   rake db:create:all
   rake db:migrate
-
-Let's give it a whirl.  Check out section 2. Running TorqueBox to deploy your app and start up the server.  Then return here.
-
 
 Next thing we need to do is make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
 
@@ -63,7 +83,7 @@ Next thing we need to do is make the our dob and name attributes pubic (This is 
 
 == Validations
 
-You can now test out your model in the rails console.  The rails console is a ruby irb (Itegrated Ruby Shell) with your full rails enviornment loaded.  It's ideal for testing things out.  
+You can now test out your model in the rails console.
 
   rails c
 

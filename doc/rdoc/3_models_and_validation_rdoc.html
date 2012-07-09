@@ -77,7 +77,7 @@
 
 <div id="documentation" class="description">
   
-<h2 id="label-2.+Face+Blog+-+Models+and+Validation">2. Face Blog - Models and Validation</h2>
+<h1 id="label-Face+Blog+-+Models+and+Validation">Face Blog - Models and Validation</h1>
 
 <p>Now that you have everything installed, you’re ready to rock n roll. 
 It’s time to create your first rails application.  You’re going to
@@ -107,6 +107,11 @@ work for us.</p>
 
 <p>We’re going to add “devise” (an authentication mechanism for rails)
 to our gem file, as well as a few libraries.</p>
+
+<p>All the libraries your application dependes on are specified in your
+applicatons Gemfile (found in your applicaitons root directory).  Let’s
+add in devise and a couple of other dependencies such as a javascript
+runtime, openssl and jdbc adapter sqlite3.</p>
 
 <p>Open up your applications Gemfile and add the following under where is
 says: gem “rails”, “3.2.x”</p>
@@ -144,15 +149,17 @@ have avaiable to you.  You can run</p>
 
 <pre>rails generate devise User name:string dob:date</pre>
 
-<p>If you look at the migration that devise created (under db/migrate) you can
-see the extra information devise has added to support all different types
-of authentication.  If you’re interested in finding out more about what
-devise can do for your application check out the devise github repository:
-<a
+<p>Migrations are the mapping between the model and the database.  If you look
+at the migration that devise created (under db/migrate) you can see that
+devise created a new table and added some information such as email,
+password + the fields we specified (name and dob) devise uses this
+information to perform a range of authentication.  If you’re interested
+in finding out more about what devise can do for your application check out
+the devise github repository: <a
 href="https://github.com/plataformatec/devise.git">github.com/plataformatec/devise.git</a></p>
 
-<p>Now that we’ve added some migrations we’ll create then migrate our
-database.</p>
+<p>Now that we’ve added some migrations we’ll create the applications
+databases and migrate.</p>
 
 <pre>rake db:create:all
 rake db:migrate</pre>

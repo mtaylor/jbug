@@ -1,4 +1,4 @@
-== Controllers and Views
+= Controllers and Views
 
 Now that we have the models complete.  We can start building the web part of our application.  The first thing we're going to do is add in a controller and some views for managing our User.  Rails has a scaffolding mechanism that generates a controller and views for standard CRUD operations.  As we'll see in a moment, these operations are associated with HTTP verbs and respond to endpoints conventional to RESTful applications.
 

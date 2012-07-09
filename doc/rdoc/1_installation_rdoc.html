@@ -77,19 +77,25 @@
 
 <div id="documentation" class="description">
   
-<h2 id="label-1.+Installation">1. Installation</h2>
+<h1 id="label-Installation">Installation</h1>
+
+<p>It’s reccommended you run this practical on a linux or mac.  Windows
+machines ca n be a bit flakely due to some of the system libraries that are
+required.</p>
 
 <h3 id="label-Prerequisites">Prerequisites</h3>
 
-<pre>yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison iconv-devel java sqlite3-devel</pre>
+<p>These are needed for jruby and for some of the ruby libaries we’ll use in
+this practical.  The packages below are tested on fedora you might need to
+find the equivilent depending on your distro.</p>
+
+<pre>yum install -y gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison java sqlite3-devel</pre>
 
 <h3 id="label-RVM">RVM</h3>
 
-<pre># Run as user not root
-curl -L https://get.rvm.io | bash -s stable
-source ~/.bash_profile</pre>
+<p>Install ruby version manager.  Follow the instructions on the link below:</p>
 
-<p>Check out your personal message from Wayne.  So compassionate!</p>
+<pre>https://rvm.io/rvm/install/</pre>
 
 <h3 id="label-JRuby">JRuby</h3>
 
