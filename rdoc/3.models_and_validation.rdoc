@@ -4,17 +4,19 @@ Now that you have everything installed, you're ready to rock n roll.  It's time 
 
 == Creating a Rails App
 
+
 - cd into the src/1 directory.  We'll work from here.
+
 
 First thing you need to do is create a new rails application.  Well that's pretty easy.
 
   rails new face_blog
 
-Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects, since you already know your way around.
+Notice the file structure.  Every rails app looks the same.  This makes it easy to quickly get involved in other rails projects, since you'll already know your way around.
 
 The main areas you'll be working in today are:
 
-  app/       # This cContains all your MVC files
+  app/       # This contains all your MVC files
   config/    # Used to configure your app
   db/        # Where migrations and schema lives
 
@@ -22,9 +24,9 @@ The main areas you'll be working in today are:
 
 First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
 
-We're going to add "devise" (an authentication mechanism for rails) to our application, as well as a few extra libraries that we'll need later.
+We're going to add "devise" (an authentication library for rails) to our application, as well as a few extra libraries that we'll need later.
 
-All the libraries your application dependes on are specified in your applicatons Gemfile (found in your applicaitons root directory).  Let's add in devise and a couple of other dependencies such as a javascript runtime, openssl and jdbc adapter sqlite3.
+All the libraries your rails application depends on are specified in your applicatons Gemfile (found in your applicaitons root directory).  Let's add in 'devise' and a few of other libs such as a javascript runtime, openssl and jdbc adapter for sqlite3.
 
 Open up your applications Gemfile and add the following under where is says: gem "rails", "3.2.x"
 
@@ -36,18 +38,19 @@ Open up your applications Gemfile and add the following under where is says: gem
 
 Notice the convention here.  The gem name is on the left followed by the version.  You can set up multiple environments in rails.  Such as development, prodcution, test.  You can specify gems for just one environment.  For example you might want to add postgres libraries for production, but for development we want to use 'sqlite3'
 
-Now run bundler to pull in the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
+Now run bundler to pull the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
 
   bundle install
 
-Note: a gemset is a feature of rvm.  It allows us to create a groups of gems that are encapsulated to prevent conflicts.
+Note: a gemset is a feature of rvm.  It allows us to create groups of gems that are contained from other gems to prevent things like version conflicts.
 
 
-Devise is a rails engine (http://guides.rubyonrails.org/engines.html), don't worry about what engines are right now, we just need to know that we need to do some setup that is specific to devise.  From you're terminal run the following (from you're applicaiton root directory)
+Devise requires us to do a little setup first.  From you're terminal run the following (from you're applicaiton root directory)
 
   rails generate devise:install
   rails generate devise:views
 
+Note: devise:install and devise:views are generators.  These are scripts that add some setup to your application.  Rails also comes with a bunch of generators you can use for creating things like controllers, models and migrations.
 
 == Testing our app
 
@@ -75,17 +78,17 @@ To close the rails console type:
 
 So we started off by saying we were going to add a user.  Let's get to the chace.
 
-To create our user model and migration we'll use a model generator.  We don't always have to stick to the generators that come with rails.  3rd party libraries can also offer generators.  To see which generators you have avaiable to you.  You can run
+To create our user model and migration we'll use a model generator.  This will create our model a migration file to update the database and a few other things used for testing.  If your curious you can check to see what generators are available in your app:
 
   rails generate
 
-To create our user model we'll use the devise model generator.
+To create our user model we'll use the devise model generator, here we've specified that we want to create a model call User and that we want it to have 2 attributes, name and dob.
 
   rails generate devise User name:string dob:date
 
-Note: A rails migration is used to make changes to your database.  If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob) devise uses this information to perform a range of authentication.  
+Note: A rails migration is used to make changes to your database.  If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob).  Devise uses those extra attributes for performing authentication.  
 
-Migrations are timestamped and ran in order.  So you can create a database then add an extra field later if you so wish.  Anyone else using your app simply runs the migrations and just that extra field is added.
+Another thing to note about  migrations ia that they are timestamped and ran in order.  So you can create a database then add an extra field later if you so wish.  Anyone else using your app simply runs the migrations from the point they last ran them and database is simply updated.  Great when your rolling out updates.
 
 So, now that we've added some migrations we'll create the applications databases and migrate.
 
@@ -114,7 +117,7 @@ What happens when you try to save me
 
   me.save!
 
-You should have receive a validation exception.  This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
+You should have received a validation exception and probably a stack trace.  This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
 
 
   me = User.new(:name => "Martyn", :dob => "11/22/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
@@ -124,7 +127,7 @@ Voila it works.  Congratulations you've just created your first rails model :D
 
 ==== NOTE: 
 
-Through out this practical your going to create many users.  Devise has a uniqueness validation on email address.  If you get complaints from Devise, you can delete conflicting users.  To delete just call the destroy method on the user; you can delete all users using the command below:
+Through out this section your going to create many users.  Devise has a uniqueness validation on email address.  So you'll likely get complaints from Devise should you try and create another user with an address that is already taken.  You can easily delete users from the rails console (rails c):
 
   # Delete a single user
   me.destroy
