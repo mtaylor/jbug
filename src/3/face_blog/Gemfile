@@ -6,7 +6,6 @@ gem 'execjs'
 gem 'therubyrhino'
 gem 'jruby-openssl'
 gem 'activerecord-jdbcsqlite3-adapter'
-gem 'torquebox-messaging'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'

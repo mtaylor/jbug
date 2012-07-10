@@ -103,7 +103,7 @@ friends.</p>
 created at runtime) we’ll stick with a queue and a message consumer to
 handle everything.</p>
 
-<p>undeploy you application</p>
+<p>Undeploy you application</p>
 
 <pre>torquebox undeploy</pre>
 
@@ -115,10 +115,13 @@ to handle the user -&gt; message association:</p>
 <p><img src="../images/model_erd.png" /></p>
 
 <p>and we’ve also added an extra controller and content to our views for
-creating and viewing our messages.  Deploy the application and check out
-the changes.</p>
+creating and viewing our messages.  Run the database migrations and deploy
+the application and check out the changes.</p>
 
-<pre>torquebox deploy # from src/3/face_blog directory</pre>
+<pre>rake db:create:all
+rake db:migrate
+
+torquebox deploy # from src/3/face_blog directory</pre>
 
 <h3 id="label-Adding+Messages+to+Face+Blog">Adding Messages to Face Blog</h3>
 
@@ -134,7 +137,8 @@ the changes.</p>
 processor.  A message processor is basically a ruby message driven bean,
 we’ll use this to get messages from the queue and associate them with
 each user.  Create a new file tweet_processor.rb under the app/processors
-directory and add in our logic to handle the message:</p>
+directory (you’ll need to create this) and add in our logic to handle the
+message:</p>
 
 <pre class="ruby"><span class="ruby-keyword">class</span> <span class="ruby-constant">TweetProcessor</span> <span class="ruby-operator">&lt;</span> <span class="ruby-constant">TorqueBox</span><span class="ruby-operator">::</span><span class="ruby-constant">Messaging</span><span class="ruby-operator">::</span><span class="ruby-constant">MessageProcessor</span>
 
@@ -161,7 +165,7 @@ config/torquebox.rb and add in the following:</p>
 <pre>queues:
   /queues/tweet:
 
-messages:
+messaging:
   /queues/tweet: TweetProcessor</pre>
 
 <p>Now consumer messages is all set up we just need to create them.  Open up

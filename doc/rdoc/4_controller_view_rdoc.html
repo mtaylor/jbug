@@ -200,6 +200,11 @@ retrieve the id of the resource we’re working on.  In both cases we’re
 using the params to retreive the ID of the friend, then we’re simply
 adding or removing it from the current users friends.</p>
 
+<p>Wel’ll need to add in some routes that point to our controllers.  Open up
+config/routes.rb and in:</p>
+
+<pre>resources :friendships</pre>
+
 <p>Next let’s update the users list page (app/views/users/list.html.erb) and
 add in links for adding and removing friends.</p>
 
@@ -238,26 +243,24 @@ the current_user is friends with and display either add or remove friend.</p>
 <p>Lastly We add a section on our show user page to list their friends and do
 a little tidying up.</p>
 
-<p>&lt;div id=“info”&gt;</p>
+<pre>&lt;div id=&quot;info&quot;&gt;
+  &lt;div id=&quot;avatar&quot;&gt;&lt;/div&gt;
+  &lt;div id=&quot;user_info&quot;&gt;
+    &lt;%= @user.name %&gt;&lt;/br&gt;
+    &lt;%= @user.dob %&gt;&lt;/br&gt;
+  &lt;/div&gt;
+  &lt;div id=&quot;contact&quot;&gt;
+    &lt;%= @user.email %&gt;
+  &lt;/div&gt;
 
-<pre>&lt;div id=&quot;avatar&quot;&gt;&lt;/div&gt;
-&lt;div id=&quot;user_info&quot;&gt;
-  &lt;%= @user.name %&gt;&lt;/br&gt;
-  &lt;%= @user.dob %&gt;&lt;/br&gt;
-&lt;/div&gt;
-&lt;div id=&quot;contact&quot;&gt;
-  &lt;%= @user.email %&gt;
-&lt;/div&gt;
-
-&lt;!-- iterate over @users friends (we set @user in the controller) --&gt;
-&lt;div id=&quot;friends&quot;&gt;
-  &lt;h3&gt;Friends&lt;/h3&gt;
-  &lt;% @user.friends.each do |user| %&gt;
-    &lt;div id=&quot;friend&quot;&gt;&lt;%= link_to user.name, user_path(user) %&gt;&lt;/div&gt;
-  &lt;% end %&gt;
+  &lt;!-- iterate over @users friends (we set @user in the controller) --&gt;
+  &lt;div id=&quot;friends&quot;&gt;
+    &lt;h3&gt;Friends&lt;/h3&gt;
+    &lt;% @user.friends.each do |user| %&gt;
+      &lt;div id=&quot;friend&quot;&gt;&lt;%= link_to user.name, user_path(user) %&gt;&lt;/div&gt;
+    &lt;% end %&gt;
+  &lt;/div&gt;
 &lt;/div&gt;</pre>
-
-<p>&lt;/div&gt;</p>
 
 <p>Now login/register and make some friends, then navigate to your user page. 
 You should be able to see a list of your friends.  Fantastic.</p>
