@@ -5,7 +5,7 @@ Now that you have everything installed, you're ready to rock n roll.  It's time 
 == Creating a Rails App
 
 
-- cd into the src/1 directory.  We'll work from here.
+  cd src/1 # From the jbug root directory.  We'll work from here.
 
 
 First thing you need to do is create a new rails application.  Well that's pretty easy.
@@ -24,7 +24,7 @@ The main areas you'll be working in today are:
 
 First thing we're going to add to our site is a User.  We want to allow the user to login, signup and all that jazz.  But of course we're not going to write all that ourselves.  We'll use a library to do the grunt work for us.
 
-We're going to add "devise" (an authentication library for rails) to our application, as well as a few extra libraries that we'll need later.
+We're going to add "devise" (an authentication gem for rails) to our application, as well as a few extra libraries that we'll need later.
 
 All the libraries your rails application depends on are specified in your applicatons Gemfile (found in your applicaitons root directory).  Let's add in 'devise' and a few of other libs such as a javascript runtime, openssl and jdbc adapter for sqlite3.
 
@@ -36,21 +36,38 @@ Open up your applications Gemfile and add the following under where is says: gem
   gem 'jruby-openssl'
   gem 'activerecord-jdbcsqlite3-adapter'
 
-Notice the convention here.  The gem name is on the left followed by the version.  You can set up multiple environments in rails.  Such as development, prodcution, test.  You can specify gems for just one environment.  For example you might want to add postgres libraries for production, but for development we want to use 'sqlite3'
+Notice the convention here.  
 
-Now run bundler to pull the dependecies into our gemset.  (Make sure you're in your applicaion root directory)
+The gem followed by  name on the left followed by the version.  
+
+  gem 'rails', '3.2.6'
+
+This specifies we want to include version 3.2.6 of rails.  Each gemfile has a source:
+
+  source 'http://rubygems.org'
+
+This tells the bundler (the component responsible for retreiving the gems) where they are located.
+
+Another interesting thing in our Gemfile is the group block.  We can include gems specifically for different groups for example:
+
+  group: test do 
+    gem 'rspec'
+  end
+
+This will include the rspec gem (a testing library) only in our test environment.
+
+Run bundler to pull the dependecies into our gemset.  Make sure you're in your application's root directory and run:
 
   bundle install
 
-Note: a gemset is a feature of rvm.  It allows us to create groups of gems that are contained from other gems to prevent things like version conflicts.
+Note: A gemset is a feature of rvm.  It allows us to create groups of gems (a level above those specified in our Gemfile) that are contained from other gems to prevent things like version conflicts.  It's reccommended that you use one getset per application environment.
 
-
-Devise requires us to do a little setup first.  From you're terminal run the following (from you're applicaiton root directory)
+So Back to devise;  We need to do a little setup.  From you're terminal run the following (from you're application's root directory)
 
   rails generate devise:install
   rails generate devise:views
 
-Note: devise:install and devise:views are generators.  These are scripts that add some setup to your application.  Rails also comes with a bunch of generators you can use for creating things like controllers, models and migrations.
+Note: devise:install and devise:views are rails generators.  Generators are scripts that add some setup to your application.  Rails comes as default with a number of generators that you can use for creating things like controllers, models and migrations.  We'll use these later.
 
 == Testing our app
 
@@ -76,7 +93,7 @@ To close the rails console type:
 
 == Models and Migrations
 
-So we started off by saying we were going to add a user.  Let's get to the chace.
+So we started off by saying we were going to add a user.  Let's get to the chase.
 
 To create our user model and migration we'll use a model generator.  This will create our model a migration file to update the database and a few other things used for testing.  If your curious you can check to see what generators are available in your app:
 
@@ -86,16 +103,24 @@ To create our user model we'll use the devise model generator, here we've specif
 
   rails generate devise User name:string dob:date
 
-Note: A rails migration is used to make changes to your database.  If you look at the migration that devise created (under db/migrate) you can see that devise created a new table and added some information such as email, password + the fields we specified (name and dob).  Devise uses those extra attributes for performing authentication.  
+We've not come across migrations yet.  
 
-Another thing to note about  migrations ia that they are timestamped and ran in order.  So you can create a database then add an extra field later if you so wish.  Anyone else using your app simply runs the migrations from the point they last ran them and database is simply updated.  Great when your rolling out updates.
+Migrations are scripts that update your database from one state to another.  If you take a look at the migration we just created (under db/migrate) you'll see that the migration specifies that we want to create a new table and add some table fields.  (The extra fields; email, password etc... are added by devise and are will be used later for authentication))
 
-So, now that we've added some migrations we'll create the applications databases and migrate.
+We might create another migration later that adds extra fields to the table or deletes the table.  The key thing to remember is that a migration will evolve the database it is not a big bang approach.
 
-  rake db:create:all # Creates databases for test, production, development
+Notice that the migration is timestamped this is how Rails knows the order to run them in.  
+
+Next, take a look at db/schema.rb.  Each time a migration is run, the schema is updated to represent the current database state.  The timestamp up where the schema is defined represents the last migration that was run.  If you add in extra migrations, rails will know to start from the timestamp given in the schema.
+
+So, now that we've added some migrations we'll create the applications databases and run our migration.
+
+  rake db:create:all # Creates databases
   rake db:migrate    # Migrates the current rails env database: development
 
-Next thing we need to do is make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method offered by ActiveRecord::Base.  Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
+Next we'll make the our dob and name attributes pubic (This is so we can mass-assign them later in our controller).  We do this by setting the attr_accessible method.  
+
+Open up the model app/models/user.rb and add in :name and :dob to the attr_accessible method:
 
   attr_accessible :email, :password, :password_confirmation, :remember_me, :name, :dob
 
@@ -105,25 +130,23 @@ You can now test out your model in the rails console.
 
   rails c
 
-You can exit the rails console at any point by issueing a quit command:
-
-  quit
-
 Lets create a new user from the rails console.
 
   me = User.new(:name => "Martyn", :dob => "11/22/1984")
 
-What happens when you try to save me
+What happens when you try to save me to the database.
 
   me.save!
 
-You should have received a validation exception and probably a stack trace.  This happens because devise has added in some extra validation to our model.  We must enter an email, password, password_confirmation when creating a new user.  Let's try again.
+You should have received a validation exception and probably a stack trace.  
+
+This happens because devise has already added some extra validation to our model.  We must enter a unique email and password and password_confirmation (which must match) Let's try again.
 
 
   me = User.new(:name => "Martyn", :dob => "11/22/1984", :email => "mtaylor@redhat.com", :password => "password", :password_confirmation => "password")
   me.save!
 
-Voila it works.  Congratulations you've just created your first rails model :D
+Voila it works.  Congratulations you've just created your first rails model and saved an object to the database. :D
 
 ==== NOTE: 
 
