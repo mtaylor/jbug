@@ -85,6 +85,10 @@ We'll implement the actions ourselves.  Open up app/controllers/friendships_cont
 
 create and destory are our actions.  In each action we use the params to retrieve the id of the resource we're working on.  In both cases we're using the params to retreive the ID of the friend, then we're simply adding or removing it from the current users friends.
 
+Wel'll need to add in some routes that point to our controllers.  Open up config/routes.rb and in:
+
+  resources :friendships
+
 Next let's update the users list page (app/views/users/list.html.erb) and add in links for adding and removing friends.
 
 We're going to customise this page a little whilst we're here.  We'll remove the new, edit and destroy links and add in some links to handle adding and removing friends.  Notice we use the devise helper methods 'current_user' inline with our html to determine when to show the friendship links.  We also use our friendship relation to check which users the current_user is friends with and display either add or remove friend.  
@@ -117,24 +121,24 @@ We're going to customise this page a little whilst we're here.  We'll remove the
 
 Lastly We add a section on our show user page to list their friends and do a little tidying up.
 
-<div id="info">
-  <div id="avatar"></div>
-  <div id="user_info">
-    <%= @user.name %></br>
-    <%= @user.dob %></br>
-  </div>
-  <div id="contact">
-    <%= @user.email %>
-  </div>
+  <div id="info">
+    <div id="avatar"></div>
+    <div id="user_info">
+      <%= @user.name %></br>
+      <%= @user.dob %></br>
+    </div>
+    <div id="contact">
+      <%= @user.email %>
+    </div>
 
-  <!-- iterate over @users friends (we set @user in the controller) -->
-  <div id="friends">
-    <h3>Friends</h3>
-    <% @user.friends.each do |user| %>
-      <div id="friend"><%= link_to user.name, user_path(user) %></div>
-    <% end %>
+    <!-- iterate over @users friends (we set @user in the controller) -->
+    <div id="friends">
+      <h3>Friends</h3>
+      <% @user.friends.each do |user| %>
+        <div id="friend"><%= link_to user.name, user_path(user) %></div>
+      <% end %>
+    </div>
   </div>
-</div>
 
 Now login/register and make some friends, then navigate to your user page.  You should be able to see a list of your friends.  Fantastic.
 

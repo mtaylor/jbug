@@ -8,7 +8,7 @@ In order for users to subscribe to a tweets channel we're going to create a queu
 
 Note: We could implement similar behaviour using topics.  For simplicity (and because TorqueBox doesn't yet support subscriptions to topics created at runtime) we'll stick with a queue and a message consumer to handle everything.
 
-undeploy you application
+Undeploy you application
 
   torquebox undeploy 
 
@@ -18,7 +18,10 @@ The application is updated a little.  We've added the in an extra model to handl
 
 link:images/model_erd.png
 
-and we've also added an extra controller and content to our views for creating and viewing our messages.  Deploy the application and check out the changes.
+and we've also added an extra controller and content to our views for creating and viewing our messages.  Run the database migrations and deploy the application and check out the changes.
+
+  rake db:create:all
+  rake db:migrate
 
   torquebox deploy # from src/3/face_blog directory
 
@@ -32,7 +35,7 @@ Then run:
 
   bundle install
 
-Now we have the relevant libraries, we'll start and create a message processor.  A message processor is basically a ruby message driven bean, we'll use this to get messages from the queue and associate them with each user.  Create a new file tweet_processor.rb under the app/processors directory and add in our logic to handle the message:
+Now we have the relevant libraries, we'll start and create a message processor.  A message processor is basically a ruby message driven bean, we'll use this to get messages from the queue and associate them with each user.  Create a new file tweet_processor.rb under the app/processors directory (you'll need to create this) and add in our logic to handle the message:
 
 
   class TweetProcessor < TorqueBox::Messaging::MessageProcessor
@@ -55,7 +58,7 @@ Next we'll create a new queue and associate it with out message processor.  This
   queues:
     /queues/tweet:
 
-  messages:
+  messaging:
     /queues/tweet: TweetProcessor
 
 Now consumer messages is all set up we just need to create them.  Open up the messages controller 'app/controllers/messages_controller.rb and add in the code to send a message in the create action.  You'll need to add it just before the redirect_to.
